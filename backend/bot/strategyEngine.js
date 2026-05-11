@@ -17,7 +17,7 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // BUY CONDITIONS
   // ======================
 
-  const strongBuySignal = rsi < 35 && trend < -0.5 && momentum > 0 && currentPrice <= supportLevel * 1.01 && botState.solHolding === 0;
+  const strongBuySignal = rsi < 60;
 
   if (strongBuySignal) {
     console.log( "BUY SIGNAL DETECTED" );
