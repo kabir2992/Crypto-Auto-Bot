@@ -22,6 +22,10 @@ app.use("/api/bot", botRoutes);
 const tradeRoutes = require("./routes/tradeRoutes");
 app.use("/api/trades", tradeRoutes);
 
+// Chart Route
+const chartRoutes = require("./routes/chartRoutes");
+app.use("/api/chart", chartRoutes);
+
 const server = http.createServer(app);
 
 // Create Socket Server

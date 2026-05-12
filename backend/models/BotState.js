@@ -35,15 +35,14 @@ const botStateSchema = new mongoose.Schema(
 
         botMode: {
             type: String,
-            enum: [
-                "WAITING",
-                "ANALYZING",
-                "BUYING",
-                "HOLDING",
-                "SELLING"
-            ],
+            enum: [ "WAITING", "ANALYZING", "BUYING", "HOLDING", "SELLING" ],
             default: "WAITING"
-        }
+        },
+
+        currentStrategy: {
+            type: String,
+            default: "Market Observation"
+        },
     },
     {
         timestamps: true
