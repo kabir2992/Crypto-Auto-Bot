@@ -1,4 +1,5 @@
 const client = require("../services/binanceService");
+const { calculateEMA, calculateRSI } = require("../services/indicatorService");
 
 const getChartData = async(req, res) => {
     try{
@@ -10,7 +11,14 @@ const getChartData = async(req, res) => {
             }
         );
 
-        const formatted = candles.data.map( candle => {
+        const closes = candles.data.map( candle => {
+            parseFloat(candle[4])
+        });
+        const ema20 = calculateEMA(closes, 20);
+        const ema50 = calculateEMA(closes, 50);
+        const rsiValues = calculateRSI(closes);
+
+        const formatted = candles.data.map( (candle, index) => {
             const originalTime = Number(candle[0]);
 
             if (!Number.isFinite(originalTime)) {
@@ -27,7 +35,10 @@ const getChartData = async(req, res) => {
                 open: parseFloat(candle[1]),
                 high: parseFloat(candle[2]),
                 low: parseFloat(candle[3]),
-                close: parseFloat(candle[4])
+                close: parseFloat(candle[4]),
+                ema20: ema20[index],
+                ema50: ema50[index],
+                rsi: rsiValues[index] || 50
             };
         });
         

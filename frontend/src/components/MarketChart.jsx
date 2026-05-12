@@ -176,37 +176,492 @@
 // };
 
 // export default MarketChart;
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  ReferenceArea,
+  Area,
+  ComposedChart
+} from "recharts";
 
-const MarketChart = ({ chartData }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+  label
+}) => {
+
+  if (
+    active &&
+    payload &&
+    payload.length
+  ) {
+
     return (
-        <div className=" bg-[#0B1120] rounded-3xl p-6 shadow-2xl border border-white/10 mb-8 ">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-white">SOLUSDT LIVE MARKET</h2>
-                    <p className="text-gray-400 mt-1">Real-time Binance Testnet Data</p>
-                </div>
-            </div>
-            <div className="h-[400px]">
 
-                <ResponsiveContainer offset="5%" stopColor="#6366F1" stopOpacity={0.8} >
-                    <AreaChart data={chartData}>
-                        <defs>
-                            <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1" >
-                                <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8} />
-                                <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
-                        <XAxis dataKey="time" stroke="#94A3B8" />
-                        <YAxis stroke="#94A3B8" domain={["auto", "auto"]} />
-                        <Tooltip contentStyle={{ backgroundColor: "#0F172A", borderRadius: "16px", border: "1px solid #334155" }} />
-                        <Area type="monotone" dataKey="close" stroke="#818CF8" fillOpacity={1} fill="url(#colorPrice)" strokeWidth={3} />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
+      <div className="
+        bg-[#0B1120]
+        border
+        border-white/10
+        rounded-2xl
+        p-4
+        shadow-2xl
+        backdrop-blur-xl
+      ">
+
+        <p className="
+          text-gray-400
+          text-sm
+          mb-2
+        ">
+
+          {label}
+
+        </p>
+
+        {
+          payload.map(
+            (item, index) => (
+
+              <p
+                key={index}
+                style={{
+                  color: item.color
+                }}
+                className="
+                  font-semibold
+                "
+              >
+
+                {item.name}: {
+                  Number(
+                    item.value
+                  ).toFixed(2)
+                }
+
+              </p>
+
+            )
+          )
+        }
+
+      </div>
+
     );
+
+  }
+
+  return null;
+
+};
+
+const MarketChart = ({
+  chartData,
+  botState
+}) => {
+
+  const formattedData =
+    chartData.map(item => ({
+
+      time:
+        new Date(
+          item.originalTime
+        ).toLocaleTimeString(
+          undefined,
+          {
+
+            hour: "2-digit",
+
+            minute: "2-digit",
+
+            hour12: true,
+
+            timeZone:
+              "Asia/Kolkata"
+
+          }
+        ),
+
+      close:
+        item.close,
+
+      ema20:
+        item.ema20,
+
+      ema50:
+        item.ema50,
+
+      rsi:
+        item.rsi
+
+    }));
+
+  const currentPrice =
+    formattedData[
+      formattedData.length - 1
+    ]?.close || 0;
+
+  const avgBuyPrice =
+    botState?.averageBuyPrice || 0;
+
+  const inProfit =
+    currentPrice > avgBuyPrice;
+
+  return (
+
+    <div className="
+      bg-[#0B1120]
+      border
+      border-white/10
+      rounded-3xl
+      p-6
+      shadow-2xl
+      mb-8
+    ">
+
+      {/* HEADER */}
+      <div className="
+        flex
+        flex-col
+        lg:flex-row
+        lg:items-center
+        lg:justify-between
+        gap-4
+        mb-8
+      ">
+
+        <div>
+
+          <h2 className="
+            text-3xl
+            font-bold
+            text-white
+          ">
+
+            SOLUSDT Advanced Chart
+
+          </h2>
+
+          <p className="
+            text-gray-400
+            mt-2
+          ">
+
+            EMA 20 • EMA 50 • RSI • Profit Zones
+
+          </p>
+
+        </div>
+
+        <div className="
+          flex
+          gap-4
+          flex-wrap
+        ">
+
+          {/* TREND */}
+          <div className="
+            px-4
+            py-2
+            rounded-2xl
+            bg-indigo-500/10
+            border
+            border-indigo-500/20
+          ">
+
+            <p className="
+              text-xs
+              text-gray-400
+            ">
+
+              Trend
+
+            </p>
+
+            <p className="
+              text-indigo-300
+              font-bold
+            ">
+
+              {
+                formattedData[
+                  formattedData.length - 1
+                ]?.ema20 >
+                formattedData[
+                  formattedData.length - 1
+                ]?.ema50
+
+                ? "Bullish"
+                : "Bearish"
+              }
+
+            </p>
+
+          </div>
+
+          {/* PROFIT */}
+          <div className="
+            px-4
+            py-2
+            rounded-2xl
+            bg-green-500/10
+            border
+            border-green-500/20
+          ">
+
+            <p className="
+              text-xs
+              text-gray-400
+            ">
+
+              Profit Zone
+
+            </p>
+
+            <p className="
+              text-green-300
+              font-bold
+            ">
+
+              {
+                inProfit
+                ? "ACTIVE"
+                : "WAITING"
+              }
+
+            </p>
+
+          </div>
+
+          {/* RSI */}
+          <div className="
+            px-4
+            py-2
+            rounded-2xl
+            bg-cyan-500/10
+            border
+            border-cyan-500/20
+          ">
+
+            <p className="
+              text-xs
+              text-gray-400
+            ">
+
+              RSI
+
+            </p>
+
+            <p className="
+              text-cyan-300
+              font-bold
+            ">
+
+              {
+                formattedData[
+                  formattedData.length - 1
+                ]?.rsi?.toFixed(2)
+              }
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* MAIN CHART */}
+      <div className="
+        h-[450px]
+        mb-12
+      ">
+
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
+
+          <ComposedChart
+            data={formattedData}
+          >
+
+            <CartesianGrid
+              stroke="#1E293B"
+              strokeDasharray="3 3"
+            />
+
+            <XAxis
+              dataKey="time"
+              stroke="#94A3B8"
+              minTickGap={40}
+            />
+
+            <YAxis
+              stroke="#94A3B8"
+              domain={[
+                "dataMin - 1",
+                "dataMax + 1"
+              ]}
+            />
+
+            <Tooltip
+              content={
+                <CustomTooltip />
+              }
+            />
+
+            {/* PROFIT ZONE */}
+            {
+              avgBuyPrice > 0 && (
+
+                <ReferenceArea
+                  y1={avgBuyPrice}
+                  y2={999999}
+                  fill="green"
+                  fillOpacity={0.08}
+                />
+
+              )
+            }
+
+            {/* LOSS ZONE */}
+            {
+              avgBuyPrice > 0 && (
+
+                <ReferenceArea
+                  y1={0}
+                  y2={avgBuyPrice}
+                  fill="red"
+                  fillOpacity={0.06}
+                />
+
+              )
+            }
+
+            {/* PRICE AREA */}
+            <Area
+              type="monotone"
+              dataKey="close"
+              stroke="#818CF8"
+              fill="#6366F1"
+              fillOpacity={0.15}
+              strokeWidth={3}
+              name="Price"
+            />
+
+            {/* EMA 20 */}
+            <Line
+              type="monotone"
+              dataKey="ema20"
+              stroke="#22C55E"
+              strokeWidth={2}
+              dot={false}
+              name="EMA 20"
+            />
+
+            {/* EMA 50 */}
+            <Line
+              type="monotone"
+              dataKey="ema50"
+              stroke="#F59E0B"
+              strokeWidth={2}
+              dot={false}
+              name="EMA 50"
+            />
+
+          </ComposedChart>
+
+        </ResponsiveContainer>
+
+      </div>
+
+      {/* RSI CHART */}
+      <div className="
+        h-[220px]
+      ">
+
+        <h3 className="
+          text-xl
+          font-bold
+          text-white
+          mb-4
+        ">
+
+          RSI Indicator
+
+        </h3>
+
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
+
+          <LineChart
+            data={formattedData}
+          >
+
+            <CartesianGrid
+              stroke="#1E293B"
+              strokeDasharray="3 3"
+            />
+
+            <XAxis
+              dataKey="time"
+              stroke="#94A3B8"
+              minTickGap={40}
+            />
+
+            <YAxis
+              domain={[0, 100]}
+              stroke="#94A3B8"
+            />
+
+            <Tooltip
+              content={
+                <CustomTooltip />
+              }
+            />
+
+            {/* OVERBOUGHT */}
+            <ReferenceArea
+              y1={70}
+              y2={100}
+              fill="red"
+              fillOpacity={0.08}
+            />
+
+            {/* OVERSOLD */}
+            <ReferenceArea
+              y1={0}
+              y2={30}
+              fill="green"
+              fillOpacity={0.08}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="rsi"
+              stroke="#38BDF8"
+              strokeWidth={3}
+              dot={false}
+              name="RSI"
+            />
+
+          </LineChart>
+
+        </ResponsiveContainer>
+
+      </div>
+
+    </div>
+
+  );
+
 };
 
 export default MarketChart;
