@@ -16,6 +16,10 @@ import BotStatus from "../components/BotStatus";
 
 import AnalysisTimer from "../components/AnalysisTimer";
 
+import MarketChart from "../components/MarketChart";
+
+import StrategyBadge from "../components/StrategyBadge";
+
 const Dashboard = () => {
 
   const [botState, setBotState] =
@@ -26,6 +30,9 @@ const Dashboard = () => {
 
   const [livePrice, setLivePrice] =
     useState(0);
+
+  const [chartData, setChartData] =
+    useState([]);
 
   const fetchBotState = async () => {
 
@@ -38,7 +45,7 @@ const Dashboard = () => {
 
     } catch (error) {
 
-      console.log(error);
+      console.log("Bot State Error: ",error);
 
     }
 
@@ -55,7 +62,7 @@ const Dashboard = () => {
 
     } catch (error) {
 
-      console.log(error);
+      console.log("Trade Error: ",error);
 
     }
 
@@ -95,6 +102,30 @@ const Dashboard = () => {
 
   }, []);
 
+  const fetchChartData = async() => {
+    try {
+      const response = await API.get("/chart");
+      setChartData(Array.isArray(response.data) ? response.data : []);
+    }
+    catch (err)
+    {
+      console.log("Chart Error: ",err);
+    }
+  };
+
+  useEffect(() => {
+    fetchChartData();
+
+    const chartInterval = setInterval(() => {
+      fetchChartData();
+    }, 5000);
+  
+    return () => {
+        clearInterval(chartInterval);
+    };
+  }, []);
+
+
   return (
 
     <div className="
@@ -119,9 +150,13 @@ const Dashboard = () => {
         }
       />
 
+      <StrategyBadge strategy={ botState?.currentStrategy } />
+
       <PriceCard
-        livePrice={livePrice}
+        livePrice={ livePrice }
       />
+
+      <MarketChart chartData={ chartData } />
 
       <div className="
         grid
@@ -134,31 +169,32 @@ const Dashboard = () => {
 
         <StatCard
           title="Balance"
-          value={`$${botState?.availableBalance?.toFixed(2) || 0}`}
-          color="text-green-400"
+          value={ `$${botState?.availableBalance?.toFixed(2) || 0}` }
+          color={ botState?.balanceWarning ? "text-red-400" : "text-green-400" }
+          warning={ botState?.balanceWarning }
         />
 
         <StatCard
           title="SOL Holdings"
-          value={botState?.solHolding?.toFixed(4) || 0}
+          value={ botState?.solHolding?.toFixed(4) || 0 }
           color="text-blue-400"
         />
 
         <StatCard
           title="Profit"
-          value={`$${botState?.totalProfit?.toFixed(2) || 0}`}
+          value={ `$${botState?.totalProfit?.toFixed(2) || 0}` }
           color="text-yellow-400"
         />
 
         <StatCard
           title="Last Action"
-          value={botState?.lastAction || "NONE"}
+          value={ botState?.lastAction || "NONE" }
           color="text-red-400"
         />
 
       </div>
 
-      <TradeTable trades={trades} />
+      <TradeTable trades={ trades } />
 
     </div>
 

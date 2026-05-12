@@ -1,7 +1,7 @@
 // This is our trading execution layer.
 
 // BUY
-// Uses 10% balance
+// Uses 50% balance
 // Calculates SOL quantity
 // Updates holdings
 // Saves trade
@@ -18,35 +18,56 @@ const executeBuy = async (price) => {
 
   const botState = await BotState.findOne();
 
-  // Use 50% balance
-  const investmentAmount =
-    botState.availableBalance * 0.5;
+  const balance = botState.availableBalance;
 
-  // Calculate SOL quantity
-  const quantity = investmentAmount / price;
+  if (balance > 10) {
 
-  // Update balances
-  botState.availableBalance -= investmentAmount;
-  botState.solHolding += quantity;
+    // Use 50% balance
+    const investmentAmount =
+      botState.availableBalance * 0.5;
 
-  // Update average buy price
-  botState.averageBuyPrice = price;
+    // Calculate SOL quantity
+    const quantity = investmentAmount / price;
 
-  botState.botMode = "BUYING";
-  botState.lastAction = "BUY";
-  
+    // Update balances
+    botState.availableBalance -= investmentAmount;
+    botState.solHolding += quantity;
 
-  await botState.save();
+    // Update average buy price
+    botState.averageBuyPrice = price;
 
-  // Save trade
-  await Trade.create({
-    side: "BUY",
-    symbol: "SOLUSDT",
-    quantity,
-    price
-  });
+    // Updates the Highest Price till it's Analysis
+    botState.highestPrice = price;
+    botState.trailingStopPrice = price - ( price * 0.05);
 
-  console.log("BUY EXECUTED");
+    botState.botMode = "BUYING";
+    botState.lastAction = "BUY";
+    botState.balanceWarning = false;
+
+
+    await botState.save();
+
+    // Save trade
+    await Trade.create({
+      side: "BUY",
+      symbol: "SOLUSDT",
+      quantity,
+      price
+    });
+
+    console.log("BUY EXECUTED");
+  }
+  else {
+    console.log("Insufficient Balance!!");
+
+    botState.botMode = "WARNING";
+    botState.lastAction = "INSUFFICIENT BALANCE";
+
+    botState.warningMessage = "INSUFFICIENT BALANCE";
+    botState.balanceWarning = true;
+
+    await botState.save();
+  }
 };
 
 const executeSell = async (price) => {
@@ -63,12 +84,10 @@ const executeSell = async (price) => {
   const sellAmount = quantity * price;
 
   // Original investment
-  const investedAmount =
-    quantity * botState.averageBuyPrice;
+  const investedAmount = quantity * botState.averageBuyPrice;
 
   // Profit
-  const profit =
-    sellAmount - investedAmount;
+  const profit = sellAmount - investedAmount;
 
   // Update balance
   botState.availableBalance += sellAmount;
@@ -79,6 +98,8 @@ const executeSell = async (price) => {
   // Reset holdings
   botState.solHolding = 0;
   botState.averageBuyPrice = 0;
+  botState.highestPrice = 0;
+  botState.trailingStopPrice = 0;
 
   botState.botMode = "SELLING";
   botState.lastAction = "SELL";
@@ -97,4 +118,4 @@ const executeSell = async (price) => {
   console.log("SELL EXECUTED");
 };
 
-module.exports = { executeBuy, executeSell};
+module.exports = { executeBuy, executeSell };

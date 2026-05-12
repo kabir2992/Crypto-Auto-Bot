@@ -24,7 +24,7 @@ const botStateSchema = new mongoose.Schema(
 
         lastAction: {
             type: String,
-            enum: ["BUY", "SELL", "HOLD", "NONE"],
+            enum: ["BUY", "SELL", "HOLD", "NONE", "INSUFFICIENT BALANCE"],
             default: "NONE"
         },
 
@@ -35,13 +35,33 @@ const botStateSchema = new mongoose.Schema(
 
         botMode: {
             type: String,
-            enum: [ "WAITING", "ANALYZING", "BUYING", "HOLDING", "SELLING" ],
+            enum: ["WAITING", "ANALYZING", "BUYING", "HOLDING", "SELLING", "WARNING"],
             default: "WAITING"
         },
 
         currentStrategy: {
             type: String,
             default: "Market Observation"
+        },
+
+        highestPrice: {
+            type: Number,
+            default: 0
+        },
+
+        trailingStopPrice: {
+            type: Number,
+            default: 0
+        },
+
+        warningMessage: {
+            type: String,
+            default: ""
+        },
+
+        balanceWarning: {
+            type: Boolean,
+            default: false
         },
     },
     {

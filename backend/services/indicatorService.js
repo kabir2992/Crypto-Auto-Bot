@@ -1,3 +1,6 @@
+// Calculates technical indicators through:-
+// RSI
+
 const { RSI } = require("technicalindicators");
 
 const calculateRSI = (closes) => {
@@ -7,7 +10,20 @@ const calculateRSI = (closes) => {
   });
 };
 
-module.exports = { calculateRSI };
+const calculateEMA = (prices, period) => {
+  const multiplier = 2 / (period + 1);
 
-// Calculates technical indicators through:-
-// RSI
+  let ema = prices[0];
+
+  const emaValues = [];
+
+  for (let i = 0; i < prices.length; i++)
+  {
+    ema = ( prices[i] - ema ) * multiplier + ema;
+    emaValues.push(ema);
+  }
+
+  return emaValues;
+};
+
+module.exports = { calculateRSI, calculateEMA };

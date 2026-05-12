@@ -1,4 +1,4 @@
-const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanceLevel, currentPrice, botState }) => {
+const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanceLevel, latestEMA20, latestEMA50, currentPrice, botState }) => {
 
   if (!botState) {
 
@@ -17,11 +17,18 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // BUY CONDITIONS
   // ======================
 
-  const strongBuySignal = rsi < 60 && trend < 0.5 && momentum >= 0 && currentPrice >= supportLevel * 1.01 && botState.solHolding === 0;
+  let buyScore = 0;
 
-  if (strongBuySignal) {
+  if (rsi < 60) buyScore += 2;
+  if (trend < -0.3) buyScore += 2;
+  if (momentum > 0) buyScore += 1;
+  if (currentPrice <= supportLevel * 1.01) buyScore += 2;
+  if (volatility < 8) buyScore += 1;
+  console.log("Buy Score: ",buyScore);
+
+  if (buyScore >= 5 && latestEMA20 > latestEMA50) {
     console.log( "BUY SIGNAL DETECTED" );
-    botState.currentStrategy = "Trend Reversal Buy";
+    botState.currentStrategy = "Trend Reversal Buy (Bullish)";
     return "BUY";
   }
 
@@ -29,9 +36,10 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // STOP LOSS
   // ======================
 
-  const stopLossSignal = botState.solHolding > 0 && currentProfit <= -2;
+  const stopLossSignal = botState.solHolding > 0 && currentProfit <= botState.trailingStopPrice;
 
   if (stopLossSignal) {
+    botState.currentStrategy = "Trailing Stop Loss";
     console.log( "STOP LOSS SELL" );
     return "SELL";
   }
@@ -40,11 +48,11 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // TAKE PROFIT
   // ======================
 
-  const takeProfitSignal = botState.solHolding > 0 && ( currentProfit >= 3 || rsi > 70 || currentPrice >= resistanceLevel * 0.99 );
+  const takeProfitSignal = botState.solHolding > 0 && ( currentProfit >= 3 && rsi > 70 && currentPrice >= resistanceLevel && latestEMA20 < latestEMA50);
 
   if (takeProfitSignal) {
     console.log( "TAKE PROFIT SELL" );
-    botState.currentStrategy = "High RSI with Min. Profit";
+    botState.currentStrategy = "High RSI with Min. Profit (Bearish)";
     return "SELL";
   }
 

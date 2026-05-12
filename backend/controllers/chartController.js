@@ -11,19 +11,19 @@ const getChartData = async(req, res) => {
         );
 
         const formatted = candles.data.map( candle => {
-            const openTime = Number(candle[0]);
+            const originalTime = Number(candle[0]);
 
-            if (!Number.isFinite(openTime)) {
+            if (!Number.isFinite(originalTime)) {
                 throw new Error(`Invalid candle open time: ${JSON.stringify(candle)}`);
             }
 
             return {
-                time: new Date(openTime)
+                time: new Date(originalTime)
                 .toLocaleTimeString([],{
                     hour: "2-digit",
                     minute: "2-digit"
                 }),
-
+                // originalTime,
                 open: parseFloat(candle[1]),
                 high: parseFloat(candle[2]),
                 low: parseFloat(candle[3]),
