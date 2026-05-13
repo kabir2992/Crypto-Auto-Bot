@@ -78,7 +78,7 @@ const executeSell = async (price) => {
     return;
   }
 
-  const quantity = botState.solHolding;
+  const quantity = botState.solHolding * 0.5;
 
   // Total sell value
   const sellAmount = quantity * price;
@@ -100,11 +100,11 @@ const executeSell = async (price) => {
   }
 
   // Reset holdings
-  const sellHolding = botState.solHolding * 0.5;
-  botState.solHolding = sellHolding;
+  // const sellHolding = botState.solHolding * 0.5;
+  botState.solHolding -= quantity;
   botState.averageBuyPrice = 0;
-  botState.highestPrice = 0;
-  botState.trailingStopPrice = 0;
+  botState.highestPrice = price;
+  botState.trailingStopPrice = price - (price * 0.05);
 
   botState.botMode = "SELLING";
   botState.lastAction = "SELL";
@@ -121,6 +121,13 @@ const executeSell = async (price) => {
   });
 
   console.log("SELL EXECUTED");
+
+  if (botState.solHolding === 0)
+  {
+    botState.averageBuyPrice = 0;
+    botState.highestPrice = 0;
+    botState.trailingStopPrice = 0;
+  }
 };
 
 module.exports = { executeBuy, executeSell };
