@@ -11,11 +11,12 @@ const getChartData = async(req, res) => {
             }
         );
 
-        const closes = candles.data.map( candle => {
+        const closes = candles.data.map( candle =>
             parseFloat(candle[4])
-        });
+        );
         const ema20 = calculateEMA(closes, 20);
         const ema50 = calculateEMA(closes, 50);
+        const rsiPeriod = 14;
         const rsiValues = calculateRSI(closes);
 
         const formatted = candles.data.map( (candle, index) => {
@@ -26,19 +27,19 @@ const getChartData = async(req, res) => {
             }
 
             return {
-                time: new Date(originalTime)
-                .toLocaleTimeString([],{
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }),
-                // originalTime,
+                // time: new Date(originalTime)
+                // .toLocaleTimeString([],{
+                //     hour: "2-digit",
+                //     minute: "2-digit"
+                // }),
+                originalTime,
                 open: parseFloat(candle[1]),
                 high: parseFloat(candle[2]),
                 low: parseFloat(candle[3]),
                 close: parseFloat(candle[4]),
                 ema20: ema20[index],
                 ema50: ema50[index],
-                rsi: rsiValues[index] || 50
+                rsi: index >= rsiPeriod ? rsiValues[index - rsiPeriod] : null
             };
         });
         

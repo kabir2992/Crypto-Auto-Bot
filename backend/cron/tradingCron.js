@@ -22,6 +22,11 @@ cron.schedule("*/1 * * * *", async () => {
       return;
     }
 
+    if (botState.availableBalance > 10 && botState.balanceWarning) {
+      botState.balanceWarning = false;
+      botState.warningMessage = "";
+    }
+
     // ======================
     // UPDATE BOT MODE
     // ======================
@@ -44,7 +49,7 @@ cron.schedule("*/1 * * * *", async () => {
     // FETCH MARKET CANDLES
     // ======================
 
-    const candles = await client.klines("SOLUSDT", "1h",
+    const candles = await client.klines("SOLUSDT", "1m",
       {
         limit: 50
       }
@@ -171,6 +176,7 @@ cron.schedule("*/1 * * * *", async () => {
 
     if (action === "HOLD") {
       botState.botMode = "HOLDING";
+      botState.lastAction = "HOLD";
       await botState.save();
     }
 

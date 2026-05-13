@@ -271,7 +271,7 @@ const MarketChart = ({
         new Date(
           item.originalTime
         ).toLocaleTimeString(
-          undefined,
+          "en-IN",
           {
 
             hour: "2-digit",
@@ -310,6 +310,8 @@ const MarketChart = ({
 
   const inProfit =
     currentPrice > avgBuyPrice;
+
+  const showRsiChart = true;
 
   return (
 
@@ -461,11 +463,12 @@ const MarketChart = ({
               font-bold
             ">
 
-              {
-                formattedData[
-                  formattedData.length - 1
-                ]?.rsi?.toFixed(2)
-              }
+                          {
+                              formattedData[formattedData.length - 1]?.rsi != null
+                                  ? formattedData[formattedData.length - 1].rsi.toFixed(2)
+                                  : "--"
+                          }
+
 
             </p>
 
@@ -581,6 +584,7 @@ const MarketChart = ({
       </div>
 
       {/* RSI CHART */}
+       {showRsiChart && (
       <div className="
         h-[220px]
       ">
@@ -628,7 +632,7 @@ const MarketChart = ({
             />
 
             {/* OVERBOUGHT */}
-            <ReferenceArea
+             <ReferenceArea
               y1={70}
               y2={100}
               fill="red"
@@ -636,7 +640,7 @@ const MarketChart = ({
             />
 
             {/* OVERSOLD */}
-            <ReferenceArea
+             <ReferenceArea
               y1={0}
               y2={30}
               fill="green"
@@ -657,6 +661,7 @@ const MarketChart = ({
         </ResponsiveContainer>
 
       </div>
+      )}
 
     </div>
 
