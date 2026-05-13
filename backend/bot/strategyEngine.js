@@ -11,7 +11,13 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // CURRENT PROFIT
   // ======================
 
-  const currentProfit = botState.solHolding > 0 ? (( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100 : 0;
+  const investedAmount = botState.solHolding * botState.averageBuyPrice;
+
+  const currentValue = botState.solHolding * currentPrice;
+
+  const currentProfit = botState.solHolding > 0 ? currentValue - investedAmount : 0;
+
+  const currentProfitPercent = investedAmount > 0 ? (currentProfit / investedAmount) * 100 : 0;
 
   // ======================
   // BUY CONDITIONS
@@ -36,7 +42,7 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // STOP LOSS
   // ======================
 
-  const stopLossSignal = botState.solHolding > 0 && currentProfit <= botState.trailingStopPrice;
+  const stopLossSignal = botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice;
 
   if (stopLossSignal) {
     botState.currentStrategy = "Trailing Stop Loss";
@@ -48,7 +54,7 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // TAKE PROFIT
   // ======================
 
-  const takeProfitSignal = botState.solHolding > 0 && ( currentProfit >= 3 && rsi > 70 && currentPrice >= resistanceLevel && latestEMA20 < latestEMA50);
+  const takeProfitSignal = botState.solHolding > 0 && ( currentProfitPercent >= 3 && rsi > 70 && currentPrice >= resistanceLevel && latestEMA20 < latestEMA50);
 
   if (takeProfitSignal) {
     console.log( "TAKE PROFIT SELL" );
@@ -71,7 +77,7 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   // ======================
   // DEFAULT HOLD
   // ======================
-  botState.currentStrategy = "Neutral RSI and no Margin of Profit";
+  botState.currentStrategy = "Neutral RSI and No Margin for Profit";
   return "HOLD";
 
 };

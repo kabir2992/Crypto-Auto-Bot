@@ -23,8 +23,7 @@ const executeBuy = async (price) => {
   if (balance > 10) {
 
     // Use 50% balance
-    const investmentAmount =
-      botState.availableBalance * 0.5;
+    const investmentAmount = botState.availableBalance * 0.5;
 
     // Calculate SOL quantity
     const quantity = investmentAmount / price;
@@ -32,6 +31,7 @@ const executeBuy = async (price) => {
     // Update balances
     botState.availableBalance -= investmentAmount;
     botState.solHolding += quantity;
+    botState.totalInvestedAmount = (botState.totalInvestedAmount || 0) + investmentAmount;
 
     // Update average buy price
     botState.averageBuyPrice = price;
@@ -95,8 +95,13 @@ const executeSell = async (price) => {
   // Update profit
   botState.totalProfit += profit;
 
+  if (profit < 0) {
+    botState.totalLoss = (botState.totalLoss || 0) + Math.abs(profit);
+  }
+
   // Reset holdings
-  botState.solHolding = 0;
+  const sellHolding = botState.solHolding * 0.5;
+  botState.solHolding = sellHolding;
   botState.averageBuyPrice = 0;
   botState.highestPrice = 0;
   botState.trailingStopPrice = 0;

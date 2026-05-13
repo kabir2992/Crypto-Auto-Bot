@@ -17,7 +17,8 @@ const getChartData = async(req, res) => {
         const ema20 = calculateEMA(closes, 20);
         const ema50 = calculateEMA(closes, 50);
         const rsiPeriod = 14;
-        const rsiValues = calculateRSI(closes);
+        const rawRSI = calculateRSI(closes);
+        const rsiValues = [ ...Array(rsiPeriod).fill(null), ...rawRSI ];
 
         const formatted = candles.data.map( (candle, index) => {
             const originalTime = Number(candle[0]);
@@ -39,7 +40,7 @@ const getChartData = async(req, res) => {
                 close: parseFloat(candle[4]),
                 ema20: ema20[index],
                 ema50: ema50[index],
-                rsi: index >= rsiPeriod ? rsiValues[index - rsiPeriod] : null
+                rsi: rsiValues[index] ?? null
             };
         });
         

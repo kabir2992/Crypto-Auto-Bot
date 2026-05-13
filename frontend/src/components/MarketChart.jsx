@@ -662,7 +662,7 @@ const MarketChart = ({
 
       </div>
       )}
-
+<br></br>
     </div>
 
   );

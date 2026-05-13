@@ -6,7 +6,7 @@ const startPriceSocket = require("./services/socketService");
 const app = require("./app");
 const connectDB = require("./config/db");
 require("./cron/tradingCron");
-// const initializeBotState = require("./utils/initializeBotState");
+const initializeBotState = require("./utils/initializeBotState");
 
 require("dotenv").config();
 
@@ -56,7 +56,7 @@ app.set("io", io);
 const PORT = process.env.PORT;
 connectDB();
 
-// initializeBotState();
+initializeBotState();
 // Start Server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

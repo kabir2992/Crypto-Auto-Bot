@@ -34,6 +34,10 @@ const Dashboard = () => {
   const [chartData, setChartData] =
     useState([]);
 
+  const lastBuyTrade = trades.find((trade) => trade.side === "BUY");
+
+  const lastSellTrade = trades.find((trade) => trade.side === "SELL");
+
   const fetchBotState = async () => {
 
     try {
@@ -69,38 +73,39 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+  fetchBotState();
+  fetchTrades();
 
+  const handleLivePrice = (data) => {
+    console.log("Live Price Received:", data);
+    setLivePrice(data.price);
+  };
+
+  const handleConnect = () => {
+    console.log("Socket Connected:", socket.id);
+  };
+
+  const handleError = (error) => {
+    console.log("Socket Error:", error.message);
+  };
+
+  socket.on("connect", handleConnect);
+  socket.on("connect_error", handleError);
+  socket.on("livePrice", handleLivePrice);
+
+  const interval = setInterval(() => {
     fetchBotState();
-
     fetchTrades();
+  }, 5000);
 
-    socket.on(
-      "livePrice",
-      (data) => {
+  return () => {
+    clearInterval(interval);
+    socket.off("connect", handleConnect);
+    socket.off("connect_error", handleError);
+    socket.off("livePrice", handleLivePrice);
+  };
+}, []);
 
-        setLivePrice(data.price);
-
-      }
-    );
-
-    const interval =
-      setInterval(() => {
-
-        fetchBotState();
-
-        fetchTrades();
-
-      }, 5000);
-
-    return () => {
-
-      clearInterval(interval);
-
-      socket.off("livePrice");
-
-    };
-
-  }, []);
 
   const fetchChartData = async() => {
     try {
@@ -128,12 +133,7 @@ const Dashboard = () => {
 
   return (
 
-    <div className="
-      min-h-screen
-      p-6
-      bg-[#050816]
-      text-white
-    ">
+    <div className=" min-h-screen p-6 bg-[#050816] text-white ">
 
       <Header />
 
@@ -158,17 +158,41 @@ const Dashboard = () => {
 
       <MarketChart chartData={ chartData } />
 
-      <div className="
-        grid
-        grid-cols-1
-        md:grid-cols-2
-        lg:grid-cols-4
-        gap-6
-        mb-8
-      ">
+        
+
+        <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 ">
 
         <StatCard
-          title="Balance"
+          title="Total Invested Amount"
+          value={ `$${botState?.totalInvestedAmount?.toFixed(2) || 0}` }
+          color="text-green-400"
+        />
+
+        <StatCard
+          title="Total Loss"
+          value={ `$${botState?.totalLoss?.toFixed(2) || 0}` }
+          color="text-red-400"
+        />
+
+        <StatCard
+          title="Last Sell Price"
+          value={ lastSellTrade ? `$${Number(lastSellTrade.price).toFixed(2)}` : "$0" }
+          color="text-green-400"
+        />
+
+        <StatCard
+          title="Last Buy Price"
+          value={ lastBuyTrade ? `$${Number(lastBuyTrade.price).toFixed(2)}` : "$0" }
+          color="text-blue-400"
+        />
+
+      </div>
+
+        <hr></hr><br></br>
+      <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 ">
+
+        <StatCard
+          title="Total Balance"
           value={ `$${botState?.availableBalance?.toFixed(2) || 0}` }
           color={ botState?.balanceWarning ? "text-red-400" : "text-green-400" }
           warning={ botState?.balanceWarning }
@@ -181,7 +205,7 @@ const Dashboard = () => {
         />
 
         <StatCard
-          title="Profit"
+          title="Total Profit"
           value={ `$${botState?.totalProfit?.toFixed(2) || 0}` }
           color="text-yellow-400"
         />

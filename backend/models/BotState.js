@@ -22,6 +22,16 @@ const botStateSchema = new mongoose.Schema(
             default: 0
         },
 
+        totalInvestedAmount: {
+            type: Number,
+            default: 0
+        },
+
+        totalLoss: {
+            type: Number,
+            default: 0
+        },
+
         lastAction: {
             type: String,
             enum: ["BUY", "SELL", "HOLD", "NONE", "INSUFFICIENT BALANCE"],
