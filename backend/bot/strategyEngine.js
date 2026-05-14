@@ -114,86 +114,225 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
 // MOMENTUM STRATEGY
 // =====================================
 
-const runMomentumStrategy = ({ rsi, trend, momentum, currentPrice, latestEMA20, latestEMA50, latestMACD, latestSignal, volatility, botState }) => {
+// =====================================
+// MOMENTUM STRATEGY
+// =====================================
+
+const runMomentumStrategy = ({
+  rsi,
+  trend,
+  momentum,
+  currentPrice,
+  latestEMA20,
+  latestEMA50,
+  latestMACD,
+  latestSignal,
+  volatility,
+  botState
+}) => {
+
+  // ======================
+  // INITIAL SCORES
+  // ======================
 
   let buyScore = 0;
-  const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
+
+  let sellScore = 0;
+
+  // ======================
+  // MACD CHECK
+  // ======================
+
+  const hasMACD =
+    hasMACDSignal({
+      latestMACD,
+      latestSignal
+    });
+
+  // ======================
+  // CURRENT PROFIT
+  // ======================
+
+  const currentProfit =
+    getCurrentProfitPercent({
+      botState,
+      currentPrice
+    });
+
+  console.log(
+    "Current Profit:",
+    currentProfit.toFixed(2) + "%"
+  );
 
   // ======================
   // BUY CONDITIONS
   // ======================
 
-  if (rsi < 60)
+  // Healthy RSI
+  if (rsi < 65)
   {
     buyScore += 2;
   }
 
-  if (trend > 0.3)
+  // Bullish Trend
+  if (trend > 0.03)
   {
     buyScore += 2;
   }
 
+  // Positive Momentum
   if (momentum > 0)
   {
     buyScore += 1;
   }
 
+  // Safe Volatility
   if (volatility < 8)
   {
     buyScore += 1;
   }
 
-  if ( latestEMA20 > latestEMA50 )
+  // EMA Bullish Crossover
+  if (latestEMA20 > latestEMA50)
   {
     buyScore += 2;
   }
 
-  if ( hasMACD && latestMACD > latestSignal )
+  // MACD Bullish
+  if (
+    hasMACD
+    &&
+    latestMACD > latestSignal
+  )
   {
     buyScore += 2;
   }
 
   // ======================
-  // FINAL BUY
+  // SELL CONDITIONS
   // ======================
 
-  const currentProfit = getCurrentProfitPercent({ botState, currentPrice });
-
-  const sellScore = botState.solHolding > 0 && currentProfit >= 3 && rsi > 70 ? 5 : 0;
-
-  const holdScore = Math.max(0, 7 - Math.max(buyScore, sellScore));
-
-  logDecisionVotes("Momentum", {
-    BUY: buyScore,
-    SELL: sellScore,
-    HOLD: holdScore
-  });
-
-  if ( buyScore >= 7 && botState.solHolding === 0 )
+  // RSI Overbought
+  if (rsi > 75)
   {
-    console.log( "BUY SIGNAL DETECTED" );
-    botState.currentStrategy = "Momentum Bullish Buy";
+    sellScore += 2;
+  }
+
+  // MACD Bearish Cross
+  if (
+    hasMACD
+    &&
+    latestMACD < latestSignal
+  )
+  {
+    sellScore += 2;
+  }
+
+  // Momentum Weakening
+  if (momentum < 0)
+  {
+    sellScore += 1;
+  }
+
+  // Trend Reversal
+  if (trend < -0.03)
+  {
+    sellScore += 2;
+  }
+
+  // Profit Available
+  if (currentProfit >= 2)
+  {
+    sellScore += 2;
+  }
+
+  // ======================
+  // HOLD SCORE
+  // ======================
+
+  const holdScore =
+    Math.max(
+      0,
+      10 - Math.max(buyScore, sellScore)
+    );
+
+  // ======================
+  // DECISION LOGS
+  // ======================
+
+  logDecisionVotes(
+    "Momentum",
+    {
+      BUY: buyScore,
+      SELL: sellScore,
+      HOLD: holdScore
+    }
+  );
+
+  // ======================
+  // BUY DECISION
+  // ======================
+
+  if (
+    buyScore > sellScore
+    &&
+    buyScore >= 7
+    &&
+    botState.solHolding === 0
+  )
+  {
+    console.log(
+      "BUY SIGNAL DETECTED"
+    );
+
+    botState.currentStrategy =
+      "Momentum Bullish Buy";
 
     return "BUY";
   }
 
   // ======================
-  // TAKE PROFIT
+  // SELL DECISION
   // ======================
 
-  if ( botState.solHolding > 0 && currentProfit >= 3 && rsi > 70 )
+  if (
+    sellScore >= buyScore
+    &&
+    sellScore >= 5
+    &&
+    botState.solHolding > 0
+  )
   {
-    console.log( "TAKE PROFIT SELL" );
-    botState.currentStrategy = "Momentum Profit Sell";
+    console.log(
+      "TAKE PROFIT SELL"
+    );
+
+    botState.currentStrategy =
+      "Momentum Profit Sell";
 
     return "SELL";
   }
 
   // ======================
-  // STOP LOSS
+  // HOLD DECISION
   // ======================
 
-  botState.currentStrategy = "Momentum Hold";
+  // Bullish Hold
+  if (
+    buyScore > sellScore
+    &&
+    botState.solHolding > 0
+  )
+  {
+    botState.currentStrategy =
+      "Momentum Bullish Hold";
+
+    return "HOLD";
+  }
+
+  // Neutral Hold
+  botState.currentStrategy =
+    "Momentum Neutral Hold";
 
   return "HOLD";
 
