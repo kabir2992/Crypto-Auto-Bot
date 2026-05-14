@@ -38,7 +38,7 @@ const AnalysisTimer = ({
 
             const minutes =
                 Math.floor(
-                    (difference % (1000 * 60 * 60))
+                    (difference % (1000 * 60 * 5))
                     / (1000 * 60)
                 );
 

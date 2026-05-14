@@ -36,7 +36,7 @@ cron.schedule("*/5 * * * *", async () => {
     // NEXT ANALYSIS TIME
     // ======================
 
-    const nextMinute = new Date(Date.now() + 60 * 1000);
+    const nextMinute = new Date(Date.now() + 5 * 60 * 1000);
 
     botState.nextAnalysisTime = nextMinute;
 

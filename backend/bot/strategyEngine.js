@@ -7,9 +7,7 @@ const getCurrentProfitPercent = ({ botState, currentPrice }) => {
 
   const currentValue = botState.solHolding * currentPrice;
 
-  return investedAmount > 0
-    ? ((currentValue - investedAmount) / investedAmount) * 100
-    : 0;
+  return investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount) * 100 : 0;
 };
 
 const hasMACDSignal = ({ latestMACD, latestSignal }) => {
@@ -231,16 +229,17 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, bot
   // DEFENSIVE SELL
   // ======================
 
-  const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice  ) * 100;
+  const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
 
   if ( botState.solHolding > 0 && currentProfitPercent <= -1.5 && sellScore >= 4 )
   {
     console.log( "DEFENSIVE SELL DETECTED" );
     botState.currentStrategy = "Defensive Exit";
-
+    console.log("Current Profit:", currentProfitPercent);  
     return "SELL";
   }
-
+  
+  console.log("Current Profit:", currentProfitPercent);
   botState.currentStrategy = "Defensive Hold";
 
   return "HOLD";
@@ -384,16 +383,11 @@ const decideTrade = (data) => {
 
   const currentProfit = getCurrentProfitPercent({ botState, currentPrice });
 
-  if (
-    botState.solHolding > 0 &&
-    currentProfit >= 3 &&
-    (
-      rsi > 70 ||
-      currentPrice >= resistanceLevel ||
-      latestEMA20 < latestEMA50 ||
-      (hasMACD && latestMACD < latestSignal)
-    )
-  ) {
+  console.log("Current Profit:", currentProfit.toFixed(2) + "%");
+
+  if ( botState.solHolding > 0 && currentProfit >= 3 && ( rsi > 70 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
+      (hasMACD && latestMACD < latestSignal) ) )
+  {
     logDecisionVotes("Global Profit Protection", {
       BUY: 0,
       SELL: 8,
@@ -425,6 +419,7 @@ const decideTrade = (data) => {
 
   if ( marketType === "SIDEWAYS" )
   {
+    console.log("SIDEWAYS Strategy Selected");
     return runMeanReversion( data );
   }
 
@@ -434,6 +429,7 @@ const decideTrade = (data) => {
 
   if ( marketType === "BULLISH" )
   {
+    console.log("BULLISH Strategy Selected");
     return runMomentumStrategy( data );
   }
 
@@ -443,6 +439,7 @@ const decideTrade = (data) => {
 
   if ( marketType === "BEARISH" )
   {
+    console.log("BEARISH Strategy Selected");
     return runDefensiveStrategy( data );
   }
 
@@ -452,6 +449,7 @@ const decideTrade = (data) => {
 
   if ( marketType === "VOLATILE" )
   {
+    console.log("VOLATILE Strategy Selected");
     return runGridStrategy( data );
   }
 
