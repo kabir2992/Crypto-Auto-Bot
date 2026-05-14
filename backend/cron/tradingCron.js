@@ -5,14 +5,13 @@ const decideTrade = require("../bot/strategyEngine");
 const { calculateRSI, calculateEMA, calculateMACD } = require("../services/indicatorService");
 const { executeBuy, executeSell } = require("../services/tradeService");
 const BotState = require("../models/BotState");
+const { analyzeMarketCondition } = require("../services/marketMemory");
 
 // cron.schedule("0 * * * *", async () => {
 
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
 
-  console.log(
-    "Running Trading Bot..."
-  );
+  console.log( "Running Trading Bot..." );
 
   try {
     const botState = await BotState.findOne();
@@ -98,9 +97,9 @@ cron.schedule("*/1 * * * *", async () => {
     // MARKET ANALYSIS
     // ======================
 
-    const analysis = analyzeMarket();
+    const analysisM = analyzeMarket();
 
-    if (!analysis) {
+    if (!analysisM) {
       console.log("Not enough market data yet...");
       return;
     }
@@ -125,13 +124,30 @@ cron.schedule("*/1 * * * *", async () => {
     // STRATEGY DECISION
     // ======================
 
-    const action = decideTrade({
+    const analysis = analyzeMarketCondition({
       rsi: latestRSI,
-      trend: analysis.trend,
-      volatility: analysis.volatility,
-      momentum: analysis.momentum,
-      supportLevel: analysis.supportLevel,
-      resistanceLevel: analysis.resistanceLevel,
+      trend: analysisM.trend,
+      volatility: analysisM.volatility,
+      momentum: analysisM.momentum,
+      supportLevel: analysisM.supportLevel,
+      resistanceLevel: analysisM.resistanceLevel,
+      ema20: latestEMA20,
+      ema50: latestEMA50,
+      macd: latestMACD,
+      latestSignal,
+      currentPrice,
+      lastPrice,
+      botState
+    });
+
+    const action = decideTrade({
+      marketType: analysis.marketType,
+      rsi: latestRSI,
+      trend: analysisM.trend,
+      volatility: analysisM.volatility,
+      momentum: analysisM.momentum,
+      supportLevel: analysisM.supportLevel,
+      resistanceLevel: analysisM.resistanceLevel,
       latestEMA20,
       latestEMA50,
       latestMACD,
@@ -144,16 +160,17 @@ cron.schedule("*/1 * * * *", async () => {
     // ======================
     // LOGS
     // ======================
-
+    // console.log("Market Score:", analysis.marketScores);
+    console.log("Votes:", analysis.votes);
     console.log("========== BOT DATA ==========");
     console.log("RSI:", latestRSI.toFixed(2));
     console.log("Current Price:", currentPrice);
     console.log("Last Price:", lastPrice);
-    console.log("Trend:", analysis.trend.toFixed(2));
-    console.log("Volatility:", analysis.volatility.toFixed(2));
-    console.log("Momentum:", analysis.momentum.toFixed(2));
-    console.log("Support:", analysis.supportLevel);
-    console.log("Resistance:", analysis.resistanceLevel);
+    console.log("Trend:", analysisM.trend.toFixed(2));
+    console.log("Volatility:", analysisM.volatility.toFixed(2));
+    console.log("Momentum:", analysisM.momentum.toFixed(2));
+    console.log("Support:", analysisM.supportLevel);
+    console.log("Resistance:", analysisM.resistanceLevel);
     console.log("Latest EMA 20:", latestEMA20);
     console.log("Latest EMA 50:", latestEMA50);
     console.log("Latest MACD:", latestMACD);
@@ -162,6 +179,8 @@ cron.schedule("*/1 * * * *", async () => {
     console.log("Bot State Highest Price:", botState.highestPrice);
     console.log("Bot State Trailing Stop Price:", botState.trailingStopPrice);
     console.log("SOL Holding:", botState.solHolding);
+    console.log("Market:", analysis.marketType);
+    console.log("Strategy:", analysis.strategyUsed);
     console.log("Action:", action);
     console.log("================================");
 
@@ -171,6 +190,8 @@ cron.schedule("*/1 * * * *", async () => {
 
     if (action === "BUY") {
       botState.botMode = "BUYING";
+      // console.log( "BUY SIGNAL DETECTED" );
+      // botState.currentStrategy = "Trend Reversal Buy (Bullish)";
       await botState.save();
       await executeBuy(currentPrice);
     }
@@ -181,6 +202,8 @@ cron.schedule("*/1 * * * *", async () => {
 
     if (action === "SELL") {
       botState.botMode = "SELLING";
+      // console.log( "TAKE PROFIT SELL" );
+      // botState.currentStrategy = "High RSI with Min. Profit (Bearish)";
       await botState.save();
       await executeSell(currentPrice);
     }
