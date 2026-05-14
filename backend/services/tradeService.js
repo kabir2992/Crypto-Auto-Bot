@@ -6,7 +6,7 @@
 // Updates holdings
 // Saves trade
 // SELL
-// Sells all SOL
+// Sells half of current SOL holding
 // Calculates profit
 // Updates balances
 // Saves trade
@@ -99,12 +99,19 @@ const executeSell = async (price) => {
     botState.totalLoss = (botState.totalLoss || 0) + Math.abs(profit);
   }
 
-  // Reset holdings
-  // const sellHolding = botState.solHolding * 0.5;
+  // Update remaining holdings
   botState.solHolding -= quantity;
-  botState.averageBuyPrice = 0;
-  botState.highestPrice = price;
-  botState.trailingStopPrice = price - (price * 0.05);
+
+  if (botState.solHolding <= 0) {
+    botState.solHolding = 0;
+    botState.averageBuyPrice = 0;
+    botState.highestPrice = 0;
+    botState.trailingStopPrice = 0;
+  }
+  else {
+    botState.highestPrice = price;
+    botState.trailingStopPrice = price - (price * 0.05);
+  }
 
   botState.botMode = "SELLING";
   botState.lastAction = "SELL";
@@ -121,13 +128,6 @@ const executeSell = async (price) => {
   });
 
   console.log("SELL EXECUTED");
-
-  if (botState.solHolding === 0)
-  {
-    botState.averageBuyPrice = 0;
-    botState.highestPrice = 0;
-    botState.trailingStopPrice = 0;
-  }
 };
 
 module.exports = { executeBuy, executeSell };

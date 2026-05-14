@@ -1,7 +1,4 @@
-const {
-  getMarketData,
-  clearMarketData
-} = require("./marketMemory");
+const { getMarketData, clearMarketData } = require("./marketMemory");
 
 const analyzeMarket = () => {
 

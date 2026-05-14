@@ -1,4 +1,4 @@
-const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanceLevel, latestEMA20, latestEMA50, currentPrice, botState }) => {
+const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanceLevel, latestEMA20, latestEMA50, latestMACD, latestSignal, currentPrice, botState }) => {
 
   if (!botState) {
 
@@ -7,6 +7,45 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
   }
 
   botState.currentStrategy = "Tred + Momentum + RSI";
+  
+  // ======================
+  // BUY CONDITIONS
+  // ======================
+  
+  let buyScore = 0;
+  const hasMACD = latestMACD !== null && latestSignal !== null && latestMACD !== undefined && latestSignal !== undefined;
+  
+  if (rsi < 60) buyScore += 2;
+  if (trend < -0.3) buyScore += 2;
+  if (momentum > 0) buyScore += 1;
+  if (currentPrice <= supportLevel * 1.01) buyScore += 2;
+  if (volatility < 8) buyScore += 1;
+  if (hasMACD && latestMACD > latestSignal) buyScore +=2;
+
+  console.log("Buy Score: ",buyScore);
+
+  if (buyScore >= 7 && latestEMA20 > latestEMA50) {
+    console.log( "BUY SIGNAL DETECTED" );
+    botState.currentStrategy = "Trend Reversal Buy (Bullish)";
+    return "BUY";
+  }
+  
+  // ======================
+  // STOP LOSS
+  // ======================
+  
+  const stopLossSignal = botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice;
+  
+  if (stopLossSignal) {
+    botState.currentStrategy = "Trailing Stop Loss";
+    console.log( "STOP LOSS SELL" );
+    return "SELL";
+  }
+  
+  // ======================
+  // TAKE PROFIT
+  // ======================
+  
   // ======================
   // CURRENT PROFIT
   // ======================
@@ -19,42 +58,7 @@ const decideTrade = ({ rsi, trend, volatility, momentum, supportLevel, resistanc
 
   const currentProfitPercent = investedAmount > 0 ? (currentProfit / investedAmount) * 100 : 0;
 
-  // ======================
-  // BUY CONDITIONS
-  // ======================
-
-  let buyScore = 0;
-
-  if (rsi < 60) buyScore += 2;
-  if (trend < -0.3) buyScore += 2;
-  if (momentum > 0) buyScore += 1;
-  if (currentPrice <= supportLevel * 1.01) buyScore += 2;
-  if (volatility < 8) buyScore += 1;
-  console.log("Buy Score: ",buyScore);
-
-  if (buyScore >= 5 && latestEMA20 > latestEMA50) {
-    console.log( "BUY SIGNAL DETECTED" );
-    botState.currentStrategy = "Trend Reversal Buy (Bullish)";
-    return "BUY";
-  }
-
-  // ======================
-  // STOP LOSS
-  // ======================
-
-  const stopLossSignal = botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice;
-
-  if (stopLossSignal) {
-    botState.currentStrategy = "Trailing Stop Loss";
-    console.log( "STOP LOSS SELL" );
-    return "SELL";
-  }
-
-  // ======================
-  // TAKE PROFIT
-  // ======================
-
-  const takeProfitSignal = botState.solHolding > 0 && ( currentProfitPercent >= 3 && rsi > 70 && currentPrice >= resistanceLevel && latestEMA20 < latestEMA50);
+  const takeProfitSignal = botState.solHolding > 0 && ( currentProfitPercent >= 3 && rsi > 70 && currentPrice >= resistanceLevel && latestEMA20 < latestEMA50 && hasMACD && latestMACD < latestSignal);
 
   if (takeProfitSignal) {
     console.log( "TAKE PROFIT SELL" );

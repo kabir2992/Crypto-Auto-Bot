@@ -2,7 +2,7 @@ const cron = require("node-cron");
 const analyzeMarket = require("../services/analysisService");
 const client = require("../services/binanceService");
 const decideTrade = require("../bot/strategyEngine");
-const { calculateRSI, calculateEMA } = require("../services/indicatorService");
+const { calculateRSI, calculateEMA, calculateMACD } = require("../services/indicatorService");
 const { executeBuy, executeSell } = require("../services/tradeService");
 const BotState = require("../models/BotState");
 
@@ -85,6 +85,16 @@ cron.schedule("*/1 * * * *", async () => {
     const latestEMA50 = ema50[ema50.length - 1];
 
     // ======================
+    // MACD CALCULATION:- Moving Average Convergence Divergence, compares short-term momentum and logn-term momentum
+    // ======================
+
+    const macdData = calculateMACD(closes);
+
+    const latestMACD = macdData.macd;
+    const latestSignal = macdData.signal;
+    const latestHistogram = macdData.histogram;
+
+    // ======================
     // MARKET ANALYSIS
     // ======================
 
@@ -124,6 +134,8 @@ cron.schedule("*/1 * * * *", async () => {
       resistanceLevel: analysis.resistanceLevel,
       latestEMA20,
       latestEMA50,
+      latestMACD,
+      latestSignal,
       currentPrice,
       lastPrice,
       botState
@@ -144,6 +156,9 @@ cron.schedule("*/1 * * * *", async () => {
     console.log("Resistance:", analysis.resistanceLevel);
     console.log("Latest EMA 20:", latestEMA20);
     console.log("Latest EMA 50:", latestEMA50);
+    console.log("Latest MACD:", latestMACD);
+    console.log("Latest MACD Signal:", latestSignal);
+    console.log("Latest MACD Histogram:", latestHistogram);
     console.log("Bot State Highest Price:", botState.highestPrice);
     console.log("Bot State Trailing Stop Price:", botState.trailingStopPrice);
     console.log("SOL Holding:", botState.solHolding);
