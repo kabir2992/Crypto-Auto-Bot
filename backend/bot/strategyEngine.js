@@ -304,7 +304,7 @@ const runMomentumStrategy = ({
 // DEFENSIVE STRATEGY
 // =====================================
 
-const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, supportLevel, botState }) => {
+const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, currentPrice, supportLevel, botState }) => {
   const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
   let sellScore = 0;
   let buyScore = 0;
