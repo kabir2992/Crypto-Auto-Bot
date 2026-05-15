@@ -311,6 +311,18 @@ const MarketChart = ({
   const inProfit =
     currentPrice > avgBuyPrice;
 
+  const latestCandle = formattedData[formattedData.length - 1];
+
+  const emaGap = Math.abs((latestCandle?.ema20 || 0) - (latestCandle?.ema50 || 0));
+
+  const trendLabel = !latestCandle?.ema20 || !latestCandle?.ema50
+      ? "Loading"
+      : emaGap < 0.3
+        ? "Sideways"
+        : latestCandle.ema20 > latestCandle.ema50
+          ? "Bullish"
+          : "Bearish";
+
   const showRsiChart = true;
 
   return (
@@ -389,17 +401,7 @@ const MarketChart = ({
               font-bold
             ">
 
-              {
-                formattedData[
-                  formattedData.length - 1
-                ]?.ema20 >
-                formattedData[
-                  formattedData.length - 1
-                ]?.ema50
-
-                ? "Bullish"
-                : "Bearish"
-              }
+              {trendLabel}
 
             </p>
 

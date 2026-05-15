@@ -159,10 +159,7 @@ const runMomentumStrategy = ({
       currentPrice
     });
 
-  console.log(
-    "Current Profit:",
-    currentProfit.toFixed(2) + "%"
-  );
+  console.log( "Current Profit:", currentProfit.toFixed(2) + "%" );
 
   // ======================
   // BUY CONDITIONS
@@ -199,11 +196,7 @@ const runMomentumStrategy = ({
   }
 
   // MACD Bullish
-  if (
-    hasMACD
-    &&
-    latestMACD > latestSignal
-  )
+  if ( hasMACD && latestMACD > latestSignal )
   {
     buyScore += 2;
   }
@@ -219,11 +212,7 @@ const runMomentumStrategy = ({
   }
 
   // MACD Bearish Cross
-  if (
-    hasMACD
-    &&
-    latestMACD < latestSignal
-  )
+  if ( hasMACD && latestMACD < latestSignal )
   {
     sellScore += 2;
   }
@@ -251,10 +240,7 @@ const runMomentumStrategy = ({
   // ======================
 
   const holdScore =
-    Math.max(
-      0,
-      10 - Math.max(buyScore, sellScore)
-    );
+    Math.max( 0, 10 - Math.max(buyScore, sellScore) );
 
   // ======================
   // DECISION LOGS
