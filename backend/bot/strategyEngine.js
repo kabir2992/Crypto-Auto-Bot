@@ -96,7 +96,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     return "BUY";
   }
 
-  if ( sellScore >= 5 && botState.solHolding > 0 )
+  if ( sellScore === 5 && botState.solHolding > 0 )
   {
     console.log( "TAKE PROFIT SELL" );
     botState.currentStrategy = "Mean Reversion Sell";
@@ -351,7 +351,7 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, sup
 
   const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
 
-  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 ) || currentProfitPercent <= -1.5 ) )
+  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 ) || currentProfitPercent >= -0.5 ) )
   {
     console.log( "DEFENSIVE SELL DETECTED" );
     botState.currentStrategy = "Defensive Profit Exit";
