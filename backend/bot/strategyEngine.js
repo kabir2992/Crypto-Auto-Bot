@@ -321,7 +321,9 @@ const runMomentumStrategy = ({
 const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, supportLevel, botState }) => {
   const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
   let sellScore = 0;
+  let buyScore = 0;
 
+  // SELL Scores Counting
   if (rsi < 40)
   {
     sellScore += 3;
@@ -335,6 +337,22 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, sup
   if ( latestMACD < latestSignal )
   {
     sellScore +=2;
+  }
+
+  // BUY Scores Counting
+  if (rsi < 35)
+  {
+    buyScore += 2;
+  }
+
+  if (currentPrice <= supportLevel * 1.01)
+  {
+    buyScore += 2;
+  }
+
+  if (momentum >= 0)
+  {
+    buyScore += 1;
   }
 
   const holdScore = Math.max(0, 5 - sellScore);
@@ -351,7 +369,7 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, sup
 
   const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
 
-  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 ) || currentProfitPercent >= -0.5 ) )
+  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 && sellScore > buyScore ) || currentProfitPercent >= -0.5 ) )
   {
     console.log( "DEFENSIVE SELL DETECTED" );
     botState.currentStrategy = "Defensive Profit Exit";
@@ -363,7 +381,7 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, sup
   // DEFENSIVE BUY
   // ======================
 
-  if ( rsi < 30 && currentPrice <= supportLevel && momentum > -0.02 )
+  if ( buyScore >= 4 && buyScore > sellScore || botState.solHolding === 0 )
   {
     console.log( "DEFENSIVE BUY DETECTED" );
     botState.currentStrategy = "Defensive Buy Exit";
@@ -512,7 +530,7 @@ const decideTrade = (data) => {
 
   console.log("Current Profit:", currentProfit.toFixed(2) + "%");
 
-  if ( botState.solHolding > 0 && currentProfit >= 3 && ( rsi > 70 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
+  if ( botState.solHolding > 0 && currentProfit >= 2 && ( rsi > 70 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
       (hasMACD && latestMACD < latestSignal) ) )
   {
     logDecisionVotes("Global Profit Protection", {
