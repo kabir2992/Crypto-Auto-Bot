@@ -78,7 +78,7 @@ const executeSell = async (price) => {
     return;
   }
 
-  const quantity = botState.solHolding * 0.5;
+  const quantity = botState.solHolding;
 
   // Total sell value
   const sellAmount = quantity * price;

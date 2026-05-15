@@ -88,7 +88,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     HOLD: holdScore
   });
 
-  if ( buyScore >= 5 && botState.solHolding === 0 )
+  if ( buyScore >= 5  )
   {
     console.log( "BUY SIGNAL DETECTED" );
     botState.currentStrategy = "Mean Reversion Buy";
@@ -277,8 +277,6 @@ const runMomentumStrategy = ({
     buyScore > sellScore
     &&
     buyScore >= 7
-    &&
-    botState.solHolding === 0
   )
   {
     console.log(
@@ -461,8 +459,7 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
   });
 
   if (
-    buyScore >= 6 &&
-    botState.solHolding === 0
+    buyScore >= 6
   )
   {
     console.log( "GRID BUY DETECTED" );
