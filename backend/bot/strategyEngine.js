@@ -355,10 +355,28 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, sup
     buyScore += 1;
   }
 
-  const holdScore = Math.max(0, 5 - sellScore);
+  // ======================
+  // HOLD SCORE
+  // ======================
+
+  const holdScore =
+    Math.max( 0 , 5 - Math.max(buyScore, sellScore) );
+
+  // ======================
+  // DECISION LOGS
+  // ======================
+
+  logDecisionVotes(
+    "Defensive",
+    {
+      BUY: buyScore,
+      SELL: sellScore,
+      HOLD: holdScore
+    }
+  );
 
   logDecisionVotes("Defensive", {
-    BUY: 0,
+    BUY: buyScore,
     SELL: sellScore,
     HOLD: holdScore
   });
