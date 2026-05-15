@@ -218,7 +218,7 @@ const runMomentumStrategy = ({
   }
 
   // Momentum Weakening
-  if (momentum < 0)
+  if (momentum <= 0)
   {
     sellScore += 1;
   }
