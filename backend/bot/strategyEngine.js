@@ -318,7 +318,7 @@ const runMomentumStrategy = ({
 // DEFENSIVE STRATEGY
 // =====================================
 
-const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, botState }) => {
+const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, supportLevel, botState }) => {
   const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
   let sellScore = 0;
 
@@ -359,7 +359,17 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, bot
     return "SELL";
   }
   
-  console.log("Current Profit:", currentProfitPercent);
+  // ======================
+  // DEFENSIVE BUY
+  // ======================
+
+  if ( rsi < 30 && currentPrice <= supportLevel && momentum > -0.02 )
+  {
+    console.log( "DEFENSIVE BUY DETECTED" );
+    botState.currentStrategy = "Defensive Buy Exit";
+    return "BUY";
+  }
+
   botState.currentStrategy = "Defensive Hold";
 
   return "HOLD";
