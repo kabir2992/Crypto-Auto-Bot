@@ -317,7 +317,7 @@ const MarketChart = ({
 
   const trendLabel = !latestCandle?.ema20 || !latestCandle?.ema50
       ? "Loading"
-      : emaGap < 0.3
+      : emaGap < 0.05
         ? "Sideways"
         : latestCandle.ema20 > latestCandle.ema50
           ? "Bullish"
