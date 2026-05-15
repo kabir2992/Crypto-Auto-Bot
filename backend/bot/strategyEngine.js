@@ -88,7 +88,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     HOLD: holdScore
   });
 
-  if ( buyScore >= 5  )
+  if ( buyScore >= 5 || botState.solHolding === 0)
   {
     console.log( "BUY SIGNAL DETECTED" );
     botState.currentStrategy = "Mean Reversion Buy";
@@ -273,18 +273,11 @@ const runMomentumStrategy = ({
   // BUY DECISION
   // ======================
 
-  if (
-    buyScore > sellScore
-    &&
-    buyScore >= 7
-  )
+  if ( ( buyScore > sellScore && buyScore >= 7 ) || botState.solHolding === 0 )
   {
-    console.log(
-      "BUY SIGNAL DETECTED"
-    );
+    console.log( "BUY SIGNAL DETECTED" );
 
-    botState.currentStrategy =
-      "Momentum Bullish Buy";
+    botState.currentStrategy = "Momentum Bullish Buy";
 
     return "BUY";
   }
@@ -293,20 +286,11 @@ const runMomentumStrategy = ({
   // SELL DECISION
   // ======================
 
-  if (
-    sellScore >= buyScore
-    &&
-    sellScore >= 5
-    &&
-    botState.solHolding > 0
-  )
+  if ( sellScore > buyScore && sellScore >= 5 && botState.solHolding > 0 )
   {
-    console.log(
-      "TAKE PROFIT SELL"
-    );
+    console.log( "TAKE PROFIT SELL" );
 
-    botState.currentStrategy =
-      "Momentum Profit Sell";
+    botState.currentStrategy = "Momentum Profit Sell";
 
     return "SELL";
   }
@@ -316,21 +300,15 @@ const runMomentumStrategy = ({
   // ======================
 
   // Bullish Hold
-  if (
-    buyScore > sellScore
-    &&
-    botState.solHolding > 0
-  )
+  if ( buyScore === sellScore && botState.solHolding >= 0 )
   {
-    botState.currentStrategy =
-      "Momentum Bullish Hold";
+    botState.currentStrategy = "Momentum Bullish Hold";
 
     return "HOLD";
   }
 
   // Neutral Hold
-  botState.currentStrategy =
-    "Momentum Neutral Hold";
+  botState.currentStrategy = "Momentum Neutral Hold";
 
   return "HOLD";
 
@@ -349,9 +327,14 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, bot
     sellScore += 3;
   }
 
-  if (hasMACD && latestMACD < latestSignal)
+  if ( hasMACD )
   {
-    sellScore += 2;
+    sellScore += 1;
+  }
+
+  if ( latestMACD < latestSignal )
+  {
+    sellScore +=2;
   }
 
   const holdScore = Math.max(0, 5 - sellScore);
@@ -371,7 +354,7 @@ const runDefensiveStrategy = ({ rsi, latestMACD, latestSignal, currentPrice, bot
   if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 ) || currentProfitPercent <= -1.5 ) )
   {
     console.log( "DEFENSIVE SELL DETECTED" );
-    botState.currentStrategy = "Defensive Exit";
+    botState.currentStrategy = "Defensive Profit Exit";
     console.log("Current Profit:", currentProfitPercent);  
     return "SELL";
   }
@@ -458,9 +441,7 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
     HOLD: holdScore
   });
 
-  if (
-    buyScore >= 6
-  )
+  if ( buyScore >= 6 || botState.solHolding === 0 )
   {
     console.log( "GRID BUY DETECTED" );
     botState.currentStrategy = "Grid Buy";
