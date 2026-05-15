@@ -59,9 +59,7 @@ const AnalysisTimer = ({
 
     }, [nextAnalysisTime]);
 
-    if (lastAction === "SELL") {
-        const title = lastAction === "SELL" ? "Waiting For Next Cycle" : "Next Analysis";
-    }
+    const title = lastAction === "SELL" ? "Waiting For Next Cycle" : "Next Analysis";
 
     return (
 
@@ -81,7 +79,7 @@ const AnalysisTimer = ({
         mb-2
       ">
 
-                Next Analysis
+                {title}
 
             </h2>
 

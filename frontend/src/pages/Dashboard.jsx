@@ -48,43 +48,28 @@ const Dashboard = () => {
         }).format(livePrice)
       : null;
 
-  const fetchBotState = async () => {
-
-    try {
-
-      const response =
-        await API.get("/bot/status");
-
-      setBotState(response.data);
-
-    } catch (error) {
-
-      console.log("Bot State Error: ",error);
-
-    }
-
-  };
-
-  const fetchTrades = async () => {
-
-    try {
-
-      const response =
-        await API.get("/trades");
-
-      setTrades(response.data);
-
-    } catch (error) {
-
-      console.log("Trade Error: ",error);
-
-    }
-
-  };
-
   useEffect(() => {
-  fetchBotState();
-  fetchTrades();
+  let cancelled = false;
+
+  const loadDashboardData = async () => {
+    try {
+      const [botResponse, tradesResponse] =
+        await Promise.all([
+          API.get("/bot/status"),
+          API.get("/trades")
+        ]);
+
+      if (!cancelled) {
+        setBotState(botResponse.data);
+        setTrades(tradesResponse.data);
+      }
+
+    } catch (error) {
+      console.log("Dashboard Data Error: ", error);
+    }
+  };
+
+  loadDashboardData();
 
   const handleLivePrice = (data) => {
     console.log("Live Price Received:", data);
@@ -104,11 +89,11 @@ const Dashboard = () => {
   socket.on("livePrice", handleLivePrice);
 
   const interval = setInterval(() => {
-    fetchBotState();
-    fetchTrades();
+    loadDashboardData();
   }, 5000);
 
   return () => {
+    cancelled = true;
     clearInterval(interval);
     socket.off("connect", handleConnect);
     socket.off("connect_error", handleError);
@@ -123,25 +108,31 @@ const Dashboard = () => {
   }, [formattedLivePrice]);
 
 
-  const fetchChartData = async() => {
-    try {
-      const response = await API.get("/chart");
-      setChartData(Array.isArray(response.data) ? response.data : []);
-    }
-    catch (err)
-    {
-      console.log("Chart Error: ",err);
-    }
-  };
-
   useEffect(() => {
-    fetchChartData();
+    let cancelled = false;
+
+    const loadChartData = async () => {
+      try {
+        const response = await API.get("/chart");
+
+        if (!cancelled) {
+          setChartData(Array.isArray(response.data) ? response.data : []);
+        }
+      }
+      catch (err)
+      {
+        console.log("Chart Error: ",err);
+      }
+    };
+
+    loadChartData();
 
     const chartInterval = setInterval(() => {
-      fetchChartData();
+      loadChartData();
     }, 5000);
   
     return () => {
+        cancelled = true;
         clearInterval(chartInterval);
     };
   }, []);
