@@ -38,6 +38,16 @@ const Dashboard = () => {
 
   const lastSellTrade = trades.find((trade) => trade.side === "SELL");
 
+  const formattedLivePrice =
+    Number(livePrice) > 0
+      ? new Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(livePrice)
+      : null;
+
   const fetchBotState = async () => {
 
     try {
@@ -105,6 +115,12 @@ const Dashboard = () => {
     socket.off("livePrice", handleLivePrice);
   };
 }, []);
+
+  useEffect(() => {
+    document.title = formattedLivePrice
+      ? `SOLUSDT • ${formattedLivePrice}`
+      : "SOLUSDT • Live Market";
+  }, [formattedLivePrice]);
 
 
   const fetchChartData = async() => {

@@ -1,5 +1,15 @@
 const PriceCard = ({ livePrice }) => {
 
+    const formattedLivePrice =
+        Number(livePrice) > 0
+            ? new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(livePrice)
+            : "$0.00";
+
     return (
 
         <div className="
@@ -41,7 +51,7 @@ const PriceCard = ({ livePrice }) => {
         font-bold
       ">
 
-                ${livePrice}
+                {formattedLivePrice}
 
             </p>
 
