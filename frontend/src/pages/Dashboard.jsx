@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import API from "../api/axios";
 
@@ -223,6 +224,35 @@ const Dashboard = () => {
           color="text-red-400"
         />
 
+      </div>
+      <div className="flex justify-end mb-8">
+        <Link
+          to="/mini-dashboard"
+          className="
+            inline-flex
+            items-center
+            gap-2
+            rounded-xl
+            border
+            border-cyan-400/30
+            bg-cyan-400/10
+            px-5
+            py-3
+            text-sm
+            font-semibold
+            text-cyan-200
+            shadow-lg
+            shadow-cyan-500/10
+            transition
+            duration-200
+            hover:border-cyan-300/60
+            hover:bg-cyan-400/20
+            hover:text-white
+          "
+        >
+          Mini Dashboard
+          <span className="text-cyan-300">-&gt;</span>
+        </Link>
       </div>
 
       <TradeTable trades={ trades } />

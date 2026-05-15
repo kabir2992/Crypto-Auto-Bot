@@ -26,6 +26,10 @@ app.use("/api/trades", tradeRoutes);
 const chartRoutes = require("./routes/chartRoutes");
 app.use("/api/chart", chartRoutes);
 
+// Screen Shot Upload
+const upload = require("./routes/uploadRoutes");
+app.use("/api", upload);
+
 const server = http.createServer(app);
 
 // Create Socket Server

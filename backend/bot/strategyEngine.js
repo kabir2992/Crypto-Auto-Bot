@@ -310,7 +310,7 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   let buyScore = 0;
 
   // SELL Scores Counting
-  if (rsi < 40)
+  if (rsi < 25)
   {
     sellScore += 3;
   }
@@ -373,7 +373,7 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
 
   const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
 
-  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 && sellScore > buyScore ) || currentProfitPercent >= -0.5 ) )
+  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 && sellScore > buyScore ) || currentProfitPercent >= -0.01 ) )
   {
     console.log( "DEFENSIVE SELL DETECTED" );
     botState.currentStrategy = "Defensive Profit Exit";

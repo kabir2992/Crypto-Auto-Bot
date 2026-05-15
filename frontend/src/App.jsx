@@ -1,7 +1,17 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import Dashboard from "./pages/Dashboard";
+import MiniDashboard from "./pages/MiniDashboard";
 
 function App() {
-  return <Dashboard />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/mini-dashboard" element={<MiniDashboard />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

@@ -260,12 +260,12 @@ const CustomTooltip = ({
 };
 
 const MarketChart = ({
-  chartData,
+  chartData = [],
   botState
 }) => {
 
   const formattedData =
-    chartData.map(item => ({
+    (Array.isArray(chartData) ? chartData : []).map(item => ({
 
       time:
         new Date(
