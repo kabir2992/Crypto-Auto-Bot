@@ -1,7 +1,7 @@
+const path = require("path");
+const multer = require("multer");
 const express = require("express");
 const router = express.Router();
-import path from "path";
-import multer from "multer";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -35,4 +35,4 @@ router.post("/upload-screenshot", upload.single("screenshot"), async (req, res) 
     }
 });
 
-export default router;
+module.exports = router;

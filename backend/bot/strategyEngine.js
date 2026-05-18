@@ -206,7 +206,7 @@ const runMomentumStrategy = ({
   // ======================
 
   // RSI Overbought
-  if (rsi > 75)
+  if (rsi > 65)
   {
     sellScore += 2;
   }
@@ -230,7 +230,7 @@ const runMomentumStrategy = ({
   }
 
   // Profit Available
-  if (currentProfit >= 2)
+  if (currentProfit >= 1.5)
   {
     sellScore += 2;
   }
@@ -371,15 +371,15 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   // DEFENSIVE SELL
   // ======================
 
-  const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
+  // const currentProfitPercent = ( ( currentPrice - botState.averageBuyPrice ) / botState.averageBuyPrice ) * 100;
 
-  if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 && sellScore > buyScore ) || currentProfitPercent >= -0.01 ) )
-  {
-    console.log( "DEFENSIVE SELL DETECTED" );
-    botState.currentStrategy = "Defensive Profit Exit";
-    console.log("Current Profit:", currentProfitPercent);  
-    return "SELL";
-  }
+  // if ( botState.solHolding > 0 && (( currentProfitPercent >= 0 && sellScore >= 4 && sellScore > buyScore ) || currentProfitPercent >= -0.01 ) )
+  // {
+  //   console.log( "DEFENSIVE SELL DETECTED" );
+  //   botState.currentStrategy = "Defensive Profit Exit";
+  //   console.log("Current Profit:", currentProfitPercent);  
+  //   return "SELL";
+  // }
   
   // ======================
   // DEFENSIVE BUY
@@ -534,7 +534,7 @@ const decideTrade = (data) => {
 
   console.log("Current Profit:", currentProfit.toFixed(2) + "%");
 
-  if ( botState.solHolding > 0 && currentProfit >= 2 && ( rsi > 70 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
+  if ( botState.solHolding > 0 && currentProfit >= 1.5 && ( rsi > 65 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
       (hasMACD && latestMACD < latestSignal) ) )
   {
     logDecisionVotes("Global Profit Protection", {

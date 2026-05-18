@@ -30,7 +30,7 @@ const Dashboard = () => {
     useState([]);
 
   const [livePrice, setLivePrice] =
-    useState(0);
+    useState([]);
 
   const [chartData, setChartData] =
     useState([]);
@@ -160,9 +160,7 @@ const Dashboard = () => {
 
       <StrategyBadge strategy={ botState?.currentStrategy } />
 
-      <PriceCard
-        livePrice={ formattedLivePrice }
-      />
+      <PriceCard livePrice={ livePrice } />
 
       <MarketChart chartData={ chartData } />
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import API from "../api/axios";
 import MarketChart from "../components/MarketChart";
 
@@ -15,48 +15,57 @@ const MiniDashboard = () => {
 
     useEffect(() => {
         let cancelled = false;
-
         const fetchDashboard = async () => {
-
             try {
-
-                const [dashboardRes, chartRes] =
-                    await Promise.all([
-                        API.get("/bot/status"),
-                        API.get("/chart")
-                    ]);
-
+                const [dashboardRes, chartRes] = await Promise.all([
+                    API.get("/bot/status"),
+                    API.get("/chart")
+                ]);
                 if (!cancelled) {
                     setDashboardData(dashboardRes.data);
                     setChartData(Array.isArray(chartRes.data) ? chartRes.data : []);
                 }
-
+            } catch (error) {
+                console.log("Mini Dashboard Error:", error.message);
             }
-
-            catch (error) {
-
-                console.log(
-                    "Mini Dashboard Error:",
-                    error.message
-                );
-
-            }
-
         };
-
         fetchDashboard();
+        const interval = setInterval(fetchDashboard, 5000);
+        return () => { cancelled = true; clearInterval(interval); };
+    }, []);
 
-        const interval = setInterval(() => {
+    // ======================
+    // Screen Shot Capturing Automatically
+    // ======================
+    
+    useEffect(() => {
+        const captureScreenShot = async () => {
+            try {
+                const element = document.getElementById("mini-dashboard");
+                if (!element) return;
 
-            fetchDashboard();
+                const dataUrl = await toPng(element, { pixelRatio: 2 }); // ✅ returns base64 URL
 
-        }, 5000);
+                // Convert base64 to blob
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();  // ✅ then convert to blob
 
-        return () => {
-            cancelled = true;
-            clearInterval(interval);
+                const formData = new FormData();
+                formData.append("screenshot", blob, "chart.png");
+
+                await API.post("/upload-screenshot", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+                console.log("✅ Screenshot Uploaded");
+
+            } catch (err) {
+                console.log("❌ Upload Failed:", err);
+            }
         };
 
+        captureScreenShot();
+        const interval = setInterval(captureScreenShot, 30500);
+        return () => clearInterval(interval);
     }, []);
 
     // ======================
@@ -95,54 +104,6 @@ const MiniDashboard = () => {
                     ? "BULLISH"
                     : "BEARISH"
             : "LOADING";
-
-
-    // ======================
-    // Screen Shot Capturing Automatically
-    // ======================
-
-    const captureScreenShot = async () => {
-        try {
-            const element = document.getElementById("mini-dashbaord");
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true
-            });
-
-            canvas.toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append("screenshot", blob, "chart.png");
-            
-            await API.post( "http://localhost:5000/api/upload-screenshort",
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-             );
-             console.log("✅ ScreenShort Uplaoded");
-            });
-        }
-        catch(err)
-        {
-            console.log("❌ Uplaod Failed:", err);
-            res.status(500).json({
-                success: false,
-                message: "❌ Upload Failed",
-                error: err
-            });
-        }
-    };
-
-    useEffect(() => {
-        captureScreenShot();
-
-        const interval = setInterval(() => {
-            captureScreenShot();
-        }, 30500);
-        return ()=> clearInterval(interval);
-    }, []);
 
     // ======================
     // UI
