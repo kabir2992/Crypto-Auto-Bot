@@ -30,6 +30,10 @@ app.use("/api/chart", chartRoutes);
 const upload = require("./routes/uploadRoutes");
 app.use("/api", upload);
 
+// AI Route for Analysing
+const ai = require("./routes/aiRoutes");
+app.use("/api/ai", ai);
+
 const server = http.createServer(app);
 
 // Create Socket Server
