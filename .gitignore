@@ -6,4 +6,4 @@ server/.env
 client/.env
 *.log
 .DS_Store
-python-ai/config/vision-key.json
+config/vision-key.json
