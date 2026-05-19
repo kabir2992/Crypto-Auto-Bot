@@ -11,7 +11,7 @@ const buildAIContext = async ({
         timestamp: new Date(),
         screenshotAnalysis: ocrData,
         indicators,
-        candles: candles.slice(-50),
+        candles: candles.slice(-100),
         marketMemory,
         recentTrades,
         currentStrategy: {

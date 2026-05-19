@@ -5,7 +5,11 @@ const decideTrade = require("../bot/strategyEngine");
 const { calculateRSI, calculateEMA, calculateMACD } = require("../services/indicatorService");
 const { executeBuy, executeSell } = require("../services/tradeService");
 const BotState = require("../models/BotState");
+const Trade = require("../models/Trade");
 const { analyzeMarketCondition } = require("../services/marketMemory");
+const aiDecisionService = require("../services/aiDecisionService");
+const buildAIContext = require("../services/aiContextBuilder");
+const decisionFusionService = require("../services/decisionFusionService");
 
 // cron.schedule("0 * * * *", async () => {
 
@@ -48,9 +52,15 @@ cron.schedule("*/5 * * * *", async () => {
     // FETCH MARKET CANDLES
     // ======================
 
-    const candles = await client.klines("SOLUSDT", "1m",
+    const candles = await client.klines("SOLUSDT", "5m",
       {
-        limit: 50
+        limit: 100
+      }
+    );
+
+    const indicators = await client.klines("SOLUSDT", "5m",
+      {
+        limit: 100
       }
     );
 
@@ -59,6 +69,10 @@ cron.schedule("*/5 * * * *", async () => {
     // ======================
 
     const closes = candles.data.map(candle => parseFloat(candle[4]));
+
+    const closesi = indicators.data.map(candle => parseFloat(candle[4]));
+
+    const recentTrades = await Trade.findOne().sort({ createdAt: -1}).limit(10);
 
     const currentPrice = closes[closes.length - 1];
 
@@ -157,6 +171,40 @@ cron.schedule("*/5 * * * *", async () => {
       botState
     });
 
+    // const action = strategyResult.action;
+
+    const context = await buildAIContext({
+      candles : closes,
+      indicators : closesi,
+      ocrData: {},
+      recentTrades : recentTrades
+    });
+
+    const aiDecision = await aiDecisionService(context);
+    console.log("AI Decision: ", aiDecision);
+
+    const fusionResult = decisionFusionService({
+      aiDecision,
+      strategyDecision: action.leadingDecision,
+      strategyVotes: {
+        BUY: action.votes?.BUY,
+        SELL: action.votes?.SELL,
+        HOLD: action.votes?.HOLD
+      }
+    });
+
+    console.log("========== AI Fusion Result ==========");
+    console.log("AI Decision:", fusionResult.aiDecision);
+    console.log("Strategy Decision:", fusionResult.strategyDecision);
+    console.log("Strategy Votes:", fusionResult.strategyVotes);
+    console.log("Final Decision:", fusionResult.finalDecision);
+    console.log("AI Confidence:", fusionResult.aiConfidence);
+    console.log("Strategy Confidence:", fusionResult.strategyConfidence);
+    console.log("Final Confidence:", fusionResult.finalConfidence);
+    console.log("AI Agree:", fusionResult.aiAgrees);
+    console.log("Fusion Reason:", fusionResult.fusionReason);
+    console.log("=======================================");
+
     // ======================
     // LOGS
     // ======================
@@ -181,14 +229,14 @@ cron.schedule("*/5 * * * *", async () => {
     console.log("SOL Holding:", botState.solHolding);
     console.log("Market:", analysis.marketType);
     console.log("Strategy:", analysis.strategyUsed);
-    console.log("Action:", action);
+    console.log("Action:", action.leadingDecision);
     console.log("================================");
 
     // ======================
     // EXECUTE BUY
     // ======================
 
-    if (action === "BUY") {
+    if (action.leadingDecision === "BUY" || action.leadingDecision === "buy") {
       botState.botMode = "BUYING";
       // console.log( "BUY SIGNAL DETECTED" );
       // botState.currentStrategy = "Trend Reversal Buy (Bullish)";
@@ -200,7 +248,7 @@ cron.schedule("*/5 * * * *", async () => {
     // EXECUTE SELL
     // ======================
 
-    if (action === "SELL") {
+    if (action.leadingDecision === "SELL" || action.leadingDecision === "sell") {
       botState.botMode = "SELLING";
       // console.log( "TAKE PROFIT SELL" );
       // botState.currentStrategy = "High RSI with Min. Profit (Bearish)";

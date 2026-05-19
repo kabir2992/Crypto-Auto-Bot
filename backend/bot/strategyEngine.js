@@ -31,6 +31,27 @@ const logDecisionVotes = (strategyName, votes) => {
   console.log("HOLD Votes:", votes.HOLD);
   console.log("Leading Decision:", winner[0]);
   console.log("====================================");
+
+  return {
+    strategyName,
+    votes,
+    leadingDecision: winner[0],
+    votesForFusion: {
+      buy: votes.BUY,
+      sell: votes.SELL,
+      hold: votes.HOLD
+    }
+  };
+};
+
+const createStrategyResult = ({ action, voteData }) => {
+  return {
+    action,
+    strategyName: voteData.strategyName,
+    votes: voteData.votes,
+    votesForFusion: voteData.votesForFusion,
+    leadingDecision: voteData.leadingDecision
+  };
 };
 
 // ======================
@@ -82,33 +103,18 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
 
   const holdScore = Math.max(0, 5 - Math.max(buyScore, sellScore));
 
-  logDecisionVotes("Mean Reversion", {
+  const voteData = logDecisionVotes("Mean Reversion", {
     BUY: buyScore,
     SELL: sellScore,
     HOLD: holdScore
   });
 
-  if ( buyScore >= 5 || botState.solHolding === 0)
+  if ( buyScore >= 5 || botState.solHolding === 0 )
   {
     console.log( "BUY SIGNAL DETECTED" );
-    botState.currentStrategy = "Mean Reversion Buy";
-
-    return "BUY";
-  }
-
-  if ( sellScore === 5 && botState.solHolding > 0 )
-  {
-    console.log( "TAKE PROFIT SELL" );
-    botState.currentStrategy = "Mean Reversion Sell";
-
-    return "SELL";
-  }
-
-  botState.currentStrategy = "Mean Reversion Hold";
-
-  return "HOLD";
 
 };
+}
 
 // =====================================
 // MOMENTUM STRATEGY
@@ -246,7 +252,7 @@ const runMomentumStrategy = ({
   // DECISION LOGS
   // ======================
 
-  logDecisionVotes(
+  const voteData = logDecisionVotes(
     "Momentum",
     {
       BUY: buyScore,
@@ -265,7 +271,10 @@ const runMomentumStrategy = ({
 
     botState.currentStrategy = "Momentum Bullish Buy";
 
-    return "BUY";
+    return createStrategyResult({
+      action: "BUY",
+      voteData
+    });
   }
 
   // ======================
@@ -278,7 +287,10 @@ const runMomentumStrategy = ({
 
     botState.currentStrategy = "Momentum Profit Sell";
 
-    return "SELL";
+    return createStrategyResult({
+      action: "SELL",
+      voteData
+    });
   }
 
   // ======================
@@ -290,13 +302,19 @@ const runMomentumStrategy = ({
   {
     botState.currentStrategy = "Momentum Bullish Hold";
 
-    return "HOLD";
+    return createStrategyResult({
+      action: "HOLD",
+      voteData
+    });
   }
 
   // Neutral Hold
   botState.currentStrategy = "Momentum Neutral Hold";
 
-  return "HOLD";
+  return createStrategyResult({
+    action: "HOLD",
+    voteData
+  });
 
 };
 
@@ -352,16 +370,7 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   // DECISION LOGS
   // ======================
 
-  logDecisionVotes(
-    "Defensive",
-    {
-      BUY: buyScore,
-      SELL: sellScore,
-      HOLD: holdScore
-    }
-  );
-
-  logDecisionVotes("Defensive", {
+  const voteData = logDecisionVotes("Defensive", {
     BUY: buyScore,
     SELL: sellScore,
     HOLD: holdScore
@@ -389,12 +398,18 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   {
     console.log( "DEFENSIVE BUY DETECTED" );
     botState.currentStrategy = "Defensive Buy Exit";
-    return "BUY";
+    return createStrategyResult({
+      action: "BUY",
+      voteData
+    });
   }
 
   botState.currentStrategy = "Defensive Hold";
 
-  return "HOLD";
+  return createStrategyResult({
+    action: "HOLD",
+    voteData
+  });
 
 };
 
@@ -413,7 +428,7 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
 
   if (volatility > 10)
   {
-    logDecisionVotes("Grid", {
+    const voteData = logDecisionVotes("Grid", {
       BUY: 0,
       SELL: 0,
       HOLD: 10
@@ -422,7 +437,10 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
     console.log( "HIGH VOLATILITY DETECTED" );
     botState.currentStrategy = "Extreme Volatility Hold";
 
-    return "HOLD";
+    return createStrategyResult({
+      action: "HOLD",
+      voteData
+    });
   }
 
   // ======================
@@ -467,7 +485,7 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
   const holdScore =
     Math.max(0, 6 - Math.max(buyScore, sellScore));
 
-  logDecisionVotes("Grid", {
+  const voteData = logDecisionVotes("Grid", {
     BUY: buyScore,
     SELL: sellScore,
     HOLD: holdScore
@@ -478,7 +496,10 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
     console.log( "GRID BUY DETECTED" );
     botState.currentStrategy = "Grid Buy";
 
-    return "BUY";
+    return createStrategyResult({
+      action: "BUY",
+      voteData
+    });
   }
 
   // ======================
@@ -489,12 +510,18 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
   {
     console.log( "GRID SELL DETECTED" );
     botState.currentStrategy = "Grid Sell";
-    return "SELL";
+    return createStrategyResult({
+      action: "SELL",
+      voteData
+    });
   }
 
   botState.currentStrategy = "Grid Hold";
 
-  return "HOLD";
+  return createStrategyResult({
+    action: "HOLD",
+    voteData
+  });
 
 };
 
@@ -508,7 +535,15 @@ const decideTrade = (data) => {
   } = data;
 
   if (!botState) {
-    return "HOLD";
+    return {
+      action: "HOLD",
+      strategyVotes: {
+        strategyName: "No BotState",
+        votes: { BUY: 0, SELL: 0, HOLD: 1 },
+        leadingDecision: "HOLD",
+        votesForFusion: { buy: 0, sell: 0, hold: 1 }
+      }
+    };
   }
 
   const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
@@ -612,7 +647,16 @@ const decideTrade = (data) => {
   });
 
   botState.currentStrategy = "Unknown Market Hold";
-  return "HOLD";
+
+  return {
+    action: "HOLD",
+    strategyVotes: {
+      strategyName: "Unknown Market",
+      votes: { BUY: 0, SELL: 0, HOLD: 1 },
+      leadingDecision: "HOLD",
+      votesForFusion: { buy: 0, sell: 0, hold: 1 }
+    }
+  };
 
 };
 
