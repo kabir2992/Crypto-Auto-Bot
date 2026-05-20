@@ -10,6 +10,7 @@ const { analyzeMarketCondition } = require("../services/marketMemory");
 const aiDecisionService = require("../services/aiDecisionService");
 const buildAIContext = require("../services/aiContextBuilder");
 const decisionFusionService = require("../services/decisionFusionService");
+const aiEvaulationService = require("../services/aiEvaulationService");
 
 // cron.schedule("0 * * * *", async () => {
 
@@ -229,14 +230,14 @@ cron.schedule("*/5 * * * *", async () => {
     console.log("SOL Holding:", botState.solHolding);
     console.log("Market:", analysis.marketType);
     console.log("Strategy:", analysis.strategyUsed);
-    console.log("Action:", action.leadingDecision);
+    console.log("Action:", action.action);
     console.log("================================");
 
     // ======================
     // EXECUTE BUY
     // ======================
 
-    if (action.leadingDecision === "BUY" || action.leadingDecision === "buy") {
+    if (action.action === "BUY" || action.action === "buy") {
       botState.botMode = "BUYING";
       // console.log( "BUY SIGNAL DETECTED" );
       // botState.currentStrategy = "Trend Reversal Buy (Bullish)";
@@ -248,7 +249,7 @@ cron.schedule("*/5 * * * *", async () => {
     // EXECUTE SELL
     // ======================
 
-    if (action.leadingDecision === "SELL" || action.leadingDecision === "sell") {
+    if (action.action === "SELL" || action.action === "sell") {
       botState.botMode = "SELLING";
       // console.log( "TAKE PROFIT SELL" );
       // botState.currentStrategy = "High RSI with Min. Profit (Bearish)";

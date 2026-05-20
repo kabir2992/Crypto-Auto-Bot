@@ -8,9 +8,7 @@ const startPriceSocket = (io) => {
   );
 
   ws.on("open", () => {
-    console.log(
-      "Connected to Binance WebSocket"
-    );
+    console.log( "Connected to Binance WebSocket" );
   });
 
   ws.on("message", (data) => {

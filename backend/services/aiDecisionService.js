@@ -7,6 +7,9 @@ const aiDecisionService = async (context) => {
 
                         Analyze the provided SOLUSDT market context carefully.
 
+                        Generate a unique professional strategy name
+                        based on your reasoning and market analysis.
+
                         Your responsibilities:
                         - analyze candle momentum
                         - analyze RSI
@@ -38,6 +41,7 @@ const aiDecisionService = async (context) => {
                         "decision": "",
                         "confidence": 0,
                         "strategy": "",
+                        "aiStrategyName": "",
                         "riskLevel": "",
                         "reason": [],
                         "recommendedEntry": 0,
@@ -69,6 +73,7 @@ const aiDecisionService = async (context) => {
             coin: "SOLUSDT",
             decision: parsed.decision,
             strategyName: parsed.strategy,
+            aiStrategyName: parsed.aiStrategyName,
             confidence: parsed.confidence,
             reason: parsed.reason,
             entryPrice: parsed.recommenedEntry,

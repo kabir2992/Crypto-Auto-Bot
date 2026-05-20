@@ -1,16 +1,59 @@
-# React + Vite
+# Frontend (Dashboard)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite UI that displays:
+- Current bot/trading state
+- Market charts (via Lightweight Charts and Recharts)
+- Strategy information / votes
+- Trade table and analytics
+- Live updates via Socket.IO
 
-Currently, two official plugins are available:
+## Key Entry Points
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **`src/main.jsx`**
+  - Mounts the React app
 
-## React Compiler
+- **`src/App.jsx`**
+  - Top-level routing/layout
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **`src/pages/Dashboard.jsx`**
+  - Main dashboard view
 
-## Expanding the ESLint configuration
+- **`src/pages/MiniDashboard.jsx`**
+  - Smaller dashboard variant
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Components
+
+- **`src/components/MarketChart.jsx`**
+  - Renders the trading market chart
+
+- **`src/components/TradeTable.jsx`**
+  - Shows trade history
+
+- **`src/components/StrategyBadge.jsx`**
+  - Displays selected strategy / action status
+
+- **`src/components/StatCard.jsx`**
+  - Small KPI widgets
+
+- **`src/components/BotStatus.jsx`**
+  - Shows bot mode (ANALYZING/BUYING/SELLING/HOLDING etc.)
+
+- **`src/components/AnalysisTimer.jsx`**
+  - Shows countdown/next analysis time
+
+## Client Services
+
+- **`src/services/socket.js`**
+  - Socket.IO client setup for real-time bot updates
+
+- **`src/api/axios.js`**
+  - Axios instance configured for backend API calls
+
+## Build / Run
+
+1. Install dependencies:
+   - `cd frontend && npm install`
+2. Start dev server:
+   - `npm run dev`
+3. Build for production:
+   - `npm run build`
