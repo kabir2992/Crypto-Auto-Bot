@@ -155,7 +155,7 @@ cron.schedule("*/5 * * * *", async () => {
       botState
     });
 
-    const action = decideTrade({
+    const strategyResult = decideTrade({
       marketType: analysis.marketType,
       rsi: latestRSI,
       trend: analysisM.trend,
@@ -172,7 +172,7 @@ cron.schedule("*/5 * * * *", async () => {
       botState
     });
 
-    // const action = strategyResult.action;
+    const action = strategyResult.action;
 
     const context = await buildAIContext({
       candles : closes,
@@ -186,11 +186,11 @@ cron.schedule("*/5 * * * *", async () => {
 
     const fusionResult = decisionFusionService({
       aiDecision,
-      strategyDecision: action.leadingDecision,
+      strategyDecision: action,
       strategyVotes: {
-        BUY: action.votes?.BUY,
-        SELL: action.votes?.SELL,
-        HOLD: action.votes?.HOLD
+        BUY: strategyResult.votes?.BUY,
+        SELL: strategyResult.votes?.SELL,
+        HOLD: strategyResult.votes?.HOLD
       }
     });
 
@@ -230,14 +230,14 @@ cron.schedule("*/5 * * * *", async () => {
     console.log("SOL Holding:", botState.solHolding);
     console.log("Market:", analysis.marketType);
     console.log("Strategy:", analysis.strategyUsed);
-    console.log("Action:", action.action);
+    console.log("Action:", strategyResult.action);
     console.log("================================");
 
     // ======================
     // EXECUTE BUY
     // ======================
 
-    if (action.action === "BUY" || action.action === "buy") {
+    if (action === "BUY" || action === "buy") {
       botState.botMode = "BUYING";
       // console.log( "BUY SIGNAL DETECTED" );
       // botState.currentStrategy = "Trend Reversal Buy (Bullish)";
@@ -249,7 +249,7 @@ cron.schedule("*/5 * * * *", async () => {
     // EXECUTE SELL
     // ======================
 
-    if (action.action === "SELL" || action.action === "sell") {
+    if (action === "SELL" || action === "sell") {
       botState.botMode = "SELLING";
       // console.log( "TAKE PROFIT SELL" );
       // botState.currentStrategy = "High RSI with Min. Profit (Bearish)";
@@ -261,7 +261,7 @@ cron.schedule("*/5 * * * *", async () => {
     // HOLD MODE
     // ======================
 
-    if (action === "HOLD") {
+    if (action === "HOLD" || action === "hold") {
       botState.botMode = "HOLDING";
       botState.lastAction = "HOLD";
       await botState.save();

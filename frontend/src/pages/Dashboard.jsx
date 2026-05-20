@@ -30,7 +30,7 @@ const Dashboard = () => {
     useState([]);
 
   const [livePrice, setLivePrice] =
-    useState([]);
+    useState(0);
 
   const [chartData, setChartData] =
     useState([]);
@@ -162,7 +162,10 @@ const Dashboard = () => {
 
       <PriceCard livePrice={ livePrice } />
 
-      <MarketChart chartData={ chartData } />
+      <MarketChart
+        chartData={ chartData }
+        botState={ botState }
+      />
 
         
 

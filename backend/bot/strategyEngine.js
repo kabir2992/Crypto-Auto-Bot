@@ -112,9 +112,33 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
   if ( buyScore >= 5 || botState.solHolding === 0 )
   {
     console.log( "BUY SIGNAL DETECTED" );
+    botState.currentStrategy = "Mean Reversion Buy";
+
+    return createStrategyResult({
+      action: "BUY",
+      voteData
+    });
+  }
+
+  if ( sellScore === 5 && botState.solHolding > 0 )
+  {
+    console.log( "TAKE PROFIT SELL" );
+    botState.currentStrategy = "Mean Reversion Sell";
+
+    return createStrategyResult({
+      action: "SELL",
+      voteData
+    });
+  }
+
+  botState.currentStrategy = "Mean Reversion Hold";
+
+  return createStrategyResult({
+    action: "HOLD",
+    voteData
+  });
 
 };
-}
 
 // =====================================
 // MOMENTUM STRATEGY
@@ -535,15 +559,16 @@ const decideTrade = (data) => {
   } = data;
 
   if (!botState) {
-    return {
+    const voteData = logDecisionVotes("No BotState", {
+      BUY: 0,
+      SELL: 0,
+      HOLD: 1
+    });
+
+    return createStrategyResult({
       action: "HOLD",
-      strategyVotes: {
-        strategyName: "No BotState",
-        votes: { BUY: 0, SELL: 0, HOLD: 1 },
-        leadingDecision: "HOLD",
-        votesForFusion: { buy: 0, sell: 0, hold: 1 }
-      }
-    };
+      voteData
+    });
   }
 
   const hasMACD = hasMACDSignal({ latestMACD, latestSignal });
@@ -553,7 +578,7 @@ const decideTrade = (data) => {
   // ======================
 
   if (botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice) {
-    logDecisionVotes("Global Risk Exit", {
+    const voteData = logDecisionVotes("Global Risk Exit", {
       BUY: 0,
       SELL: 10,
       HOLD: 0
@@ -562,7 +587,10 @@ const decideTrade = (data) => {
     console.log("TRAILING STOP DETECTED");
     botState.currentStrategy = "Global Trailing Stop";
 
-    return "SELL";
+    return createStrategyResult({
+      action: "SELL",
+      voteData
+    });
   }
 
   const currentProfit = getCurrentProfitPercent({ botState, currentPrice });
@@ -572,7 +600,7 @@ const decideTrade = (data) => {
   if ( botState.solHolding > 0 && currentProfit >= 1.5 && ( rsi > 65 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
       (hasMACD && latestMACD < latestSignal) ) )
   {
-    logDecisionVotes("Global Profit Protection", {
+    const voteData = logDecisionVotes("Global Profit Protection", {
       BUY: 0,
       SELL: 8,
       HOLD: 0
@@ -581,11 +609,14 @@ const decideTrade = (data) => {
     console.log("GLOBAL PROFIT PROTECTION SELL");
     botState.currentStrategy = "Global Profit Protection";
 
-    return "SELL";
+    return createStrategyResult({
+      action: "SELL",
+      voteData
+    });
   }
 
   if (botState.solHolding === 0 && volatility > 10) {
-    logDecisionVotes("Volatility Trap", {
+    const voteData = logDecisionVotes("Volatility Trap", {
       BUY: 0,
       SELL: 0,
       HOLD: 10
@@ -594,7 +625,10 @@ const decideTrade = (data) => {
     console.log("VOLATILITY TRAP AVOIDED");
     botState.currentStrategy = "Volatility Trap Avoided";
 
-    return "HOLD";
+    return createStrategyResult({
+      action: "HOLD",
+      voteData
+    });
   }
 
   // ======================
@@ -640,7 +674,7 @@ const decideTrade = (data) => {
   // ======================
   // DEFAULT HOLD
   // ======================
-  logDecisionVotes("Unknown Market", {
+  const voteData = logDecisionVotes("Unknown Market", {
     BUY: 0,
     SELL: 0,
     HOLD: 1
@@ -648,15 +682,10 @@ const decideTrade = (data) => {
 
   botState.currentStrategy = "Unknown Market Hold";
 
-  return {
+  return createStrategyResult({
     action: "HOLD",
-    strategyVotes: {
-      strategyName: "Unknown Market",
-      votes: { BUY: 0, SELL: 0, HOLD: 1 },
-      leadingDecision: "HOLD",
-      votesForFusion: { buy: 0, sell: 0, hold: 1 }
-    }
-  };
+    voteData
+  });
 
 };
 
