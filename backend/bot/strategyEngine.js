@@ -220,7 +220,7 @@ const runMomentumStrategy = ({
   // MACD Bearish Cross
   if ( hasMACD && latestMACD < latestSignal )
   {
-    sellScore += 2;
+    sellScore += 3;
   }
 
   // Momentum Weakening
