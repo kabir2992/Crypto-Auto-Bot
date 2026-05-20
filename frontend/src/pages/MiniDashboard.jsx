@@ -44,11 +44,11 @@ const MiniDashboard = () => {
                 const element = document.getElementById("mini-dashboard");
                 if (!element) return;
 
-                const dataUrl = await toPng(element, { pixelRatio: 2 }); // ✅ returns base64 URL
+                const dataUrl = await toPng(element, { pixelRatio: 2 });
 
                 // Convert base64 to blob
                 const res = await fetch(dataUrl);
-                const blob = await res.blob();  // ✅ then convert to blob
+                const blob = await res.blob();
 
                 const formData = new FormData();
                 formData.append("screenshot", blob, "chart.png");
@@ -289,7 +289,7 @@ const MiniDashboard = () => {
                 <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800">
 
                     <p className="text-slate-400 text-sm mb-2">
-                        SOL Balance
+                        Balance Left
                     </p>
 
                     <h2 className="text-2xl font-bold">
