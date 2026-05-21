@@ -36,7 +36,7 @@ const Header = () => {
             font-bold
           ">
 
-            Binance Auto Bot
+            Crypto Auto Bot
 
           </h1>
 

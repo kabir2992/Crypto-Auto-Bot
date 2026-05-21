@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
+import MainLayout from "../layouts/MainLayout";
 import API from "../api/axios";
 
 import socket from "../services/socket";
@@ -35,9 +35,12 @@ const Dashboard = () => {
   const [chartData, setChartData] =
     useState([]);
 
-  const lastBuyTrade = trades.find((trade) => trade.side === "BUY");
+  const tradeList =
+    Array.isArray(trades) ? trades : [];
 
-  const lastSellTrade = trades.find((trade) => trade.side === "SELL");
+  const lastBuyTrade = tradeList.find((trade) => trade.side === "BUY");
+
+  const lastSellTrade = tradeList.find((trade) => trade.side === "SELL");
 
   const formattedLivePrice =
     Number(livePrice) > 0
@@ -62,7 +65,7 @@ const Dashboard = () => {
 
       if (!cancelled) {
         setBotState(botResponse.data);
-        setTrades(tradesResponse.data);
+        setTrades(Array.isArray(tradesResponse.data) ? tradesResponse.data : []);
       }
 
     } catch (error) {
@@ -141,7 +144,7 @@ const Dashboard = () => {
 
   return (
 
-    <div className=" min-h-screen p-6 bg-[#050816] text-white ">
+    <MainLayout>
 
       <Header />
 
@@ -233,9 +236,9 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      <TradeTable trades={ trades } />
+      <TradeTable trades={ tradeList } />
 
-    </div>
+    </MainLayout>
 
   );
 

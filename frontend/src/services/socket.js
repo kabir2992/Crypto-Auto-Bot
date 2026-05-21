@@ -1,8 +1,12 @@
 import { io } from "socket.io-client";
 
 const socket = io(
-  // "http://56.228.15.68:5000"
-  "http://localhost:5000"
+  import.meta.env.VITE_SOCKET_URL ||
+    import.meta.env.VITE_LIVE_SOCKET_API_URL ||
+    "http://localhost:5000",
+  {
+    transports: ["websocket"]
+  }
 );
 
 export default socket;

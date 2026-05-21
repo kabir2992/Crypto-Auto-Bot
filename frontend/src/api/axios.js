@@ -1,8 +1,10 @@
 import axios from "axios";
 
 const API = axios.create({
-  // baseURL: "http://56.228.15.68:5000/api"
-  baseURL: "http://localhost:5000/api"
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_LIVE_API_URL ||
+    "http://localhost:5000/api"
 });
 
 export default API;

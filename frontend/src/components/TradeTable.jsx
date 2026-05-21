@@ -1,4 +1,6 @@
 const TradeTable = ({ trades }) => {
+  const tradeList =
+    Array.isArray(trades) ? trades : [];
 
   return (
 
@@ -62,7 +64,7 @@ const TradeTable = ({ trades }) => {
 
           <tbody>
 
-            {trades.map((trade) => (
+            {tradeList.map((trade) => (
 
               <tr
                 key={trade._id}
