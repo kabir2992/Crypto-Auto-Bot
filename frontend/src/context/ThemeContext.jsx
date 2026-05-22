@@ -1,33 +1,44 @@
 import {
   createContext,
-  useContext,
   useEffect,
   useState
 } from "react";
 
-const ThemeContext = createContext();
+export const ThemeContext =
+  createContext();
 
-export const ThemeProvider = ({ children }) => {
+export const ThemeProvider = ({
+  children
+}) => {
 
-  const [theme, setTheme] = useState(() => {
+  const [theme, setTheme] =
+    useState(() => {
 
-    const savedTheme =
-      localStorage.getItem("theme");
+      return (
+        localStorage.getItem("theme")
+        || "dark"
+      );
 
-    return savedTheme || "dark";
-
-  });
+    });
 
   useEffect(() => {
 
     const root =
       window.document.documentElement;
 
-    root.classList.remove("light", "dark");
+    if (theme === "dark")
+    {
+      root.classList.add("dark");
+    }
+    else
+    {
+      root.classList.remove("dark");
+    }
 
-    root.classList.add(theme);
-
-    localStorage.setItem("theme", theme);
+    localStorage.setItem(
+      "theme",
+      theme
+    );
 
   }, [theme]);
 
@@ -57,6 +68,3 @@ export const ThemeProvider = ({ children }) => {
   );
 
 };
-
-export const useThemeContext = () =>
-  useContext(ThemeContext);

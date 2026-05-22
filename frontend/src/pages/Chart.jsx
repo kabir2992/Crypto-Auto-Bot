@@ -34,14 +34,14 @@ const Chart = () => {
 
   } = useDashboardData();
 
-//   if (loading)
-//   {
-//     return (
-//       <CoinLoader
-//         message="LOADING ADVANCED MARKET CHARTS..."
-//       />
-//     );
-//   }
+  if (loading)
+  {
+    return (
+      <CoinLoader
+        message="LOADING ADVANCED MARKET CHARTS..."
+      />
+    );
+  }
 
   const latestCandle =
     chartData?.[

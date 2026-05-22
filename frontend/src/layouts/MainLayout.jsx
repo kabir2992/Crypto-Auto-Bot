@@ -46,10 +46,14 @@ const MainLayout = ({
 
     <div className="
       min-h-screen
-      bg-slate-950
-      text-white
+      bg-slate-100
+      dark:bg-[#020617]
+      dark:text-white
+      text-slate-900
       flex
+      transition-all
       overflow-hidden
+      duration-300
     ">
 
       {/* LOADER */}

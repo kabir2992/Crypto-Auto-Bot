@@ -73,7 +73,7 @@ const Sidebar = ({
       backdrop-blur-xl
       flex
       flex-col
-      ${sidebarOpen ? "w-[280px]" : "w-[90px]"}
+      ${sidebarOpen ? "w-[280px]" : "w-[74px]"}
     `}>
 
       {/* TOP LOGO */}
@@ -136,7 +136,7 @@ const Sidebar = ({
                   text-white
                 ">
 
-                  SOL AI BOT
+                  Crypto AI BOT
 
                 </h2>
 

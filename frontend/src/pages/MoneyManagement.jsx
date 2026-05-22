@@ -37,14 +37,14 @@ const MoneyManagement = () => {
   const [openModal, setOpenModal] =
     useState(false);
 
-//   if (loading)
-//   {
-//     return (
-//       <CoinLoader
-//         message="LOADING PORTFOLIO MANAGEMENT..."
-//       />
-//     );
-//   }
+  if (loading)
+  {
+    return (
+      <CoinLoader
+        message="LOADING PORTFOLIO MANAGEMENT..."
+      />
+    );
+  }
 
   const availableBalance =
     botState?.availableBalance || 0;

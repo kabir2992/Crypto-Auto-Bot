@@ -29,8 +29,8 @@ const Topbar = ({
       z-30
       h-[80px]
       border-b
-      border-white/10
-      bg-[#020617]/90
+      text-slate-700 dark:text-slate-300
+      bg-white/90 dark:bg-[#020617]/90
       backdrop-blur-xl
       flex
       items-center
@@ -62,11 +62,11 @@ const Topbar = ({
             rounded-xl
             bg-white/5
             border
-            border-white/10
+            border-slate-200 dark:border-white/10
             flex
             items-center
             justify-center
-            text-slate-300
+            text-slate-700 dark:text-slate-300
           "
         >
 
@@ -145,11 +145,11 @@ const Topbar = ({
             px-4
             rounded-xl
             border
-            border-white/10
+            border-slate-200 dark:border-white/10
             bg-white/5
             text-sm
             font-semibold
-            text-slate-300
+            text-slate-700 dark:text-slate-700 dark:text-slate-300
             hover:bg-cyan-500/20
             transition-all
           "
@@ -171,12 +171,12 @@ const Topbar = ({
           h-11
           rounded-xl
           border
-          border-white/10
+          border-slate-200 dark:border-white/10
           bg-white/5
           flex
           items-center
           justify-center
-          text-slate-300
+          text-slate-700 dark:text-slate-700 dark:text-slate-300
           hover:bg-white/10
           transition-all
         ">
