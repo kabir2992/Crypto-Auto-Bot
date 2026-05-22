@@ -1,17 +1,17 @@
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
-  ReferenceArea
+  Cell
 } from "recharts";
 
 import GlassCard from "../ui/GlassCard";
 
-const RSIChart = ({
+const VolumeChart = ({
   chartData = []
 }) => {
 
@@ -30,14 +30,18 @@ const RSIChart = ({
           }
         ),
 
-      rsi: item.rsi
+      volume:
+        item.volume || 0,
+
+      bullish:
+        item.close >= item.open
 
     }));
 
-  const latestRSI =
+  const latestVolume =
     formattedData[
       formattedData.length - 1
-    ]?.rsi || 0;
+    ]?.volume || 0;
 
   return (
 
@@ -49,8 +53,11 @@ const RSIChart = ({
 
       <div className="
         flex
-        items-center
-        justify-between
+        flex-col
+        lg:flex-row
+        lg:items-center
+        lg:justify-between
+        gap-4
         mb-6
       ">
 
@@ -62,16 +69,16 @@ const RSIChart = ({
             text-white
           ">
 
-            RSI Indicator
+            Market Volume
 
           </h2>
 
           <p className="
+            mt-2
             text-slate-400
-            mt-1
           ">
 
-            Overbought & Oversold Zones
+            Buyer vs seller pressure analysis
 
           </p>
 
@@ -79,29 +86,30 @@ const RSIChart = ({
 
         <div className="
           rounded-2xl
-          px-4
+          px-5
           py-3
-          bg-cyan-500/10
           border
           border-cyan-400/10
+          bg-cyan-500/10
         ">
 
           <p className="
             text-xs
             text-slate-400
+            mb-1
           ">
 
-            CURRENT RSI
+            LIVE VOLUME
 
           </p>
 
           <h2 className="
-            text-2xl
+            text-xl
             font-black
             text-cyan-300
           ">
 
-            {latestRSI.toFixed(2)}
+            {Number(latestVolume).toFixed(2)}
 
           </h2>
 
@@ -120,7 +128,7 @@ const RSIChart = ({
           height="100%"
         >
 
-          <LineChart
+          <BarChart
             data={formattedData}
           >
 
@@ -135,39 +143,36 @@ const RSIChart = ({
             />
 
             <YAxis
-              domain={[0, 100]}
               stroke="#94a3b8"
             />
 
             <Tooltip />
 
-            {/* OVERBOUGHT */}
+            <Bar
+              dataKey="volume"
+              radius={[6, 6, 0, 0]}
+            >
 
-            <ReferenceArea
-              y1={70}
-              y2={100}
-              fill="red"
-              fillOpacity={0.08}
-            />
+              {
+                formattedData.map(
+                  (entry, index) => (
 
-            {/* OVERSOLD */}
+                    <Cell
+                      key={index}
+                      fill={
+                        entry.bullish
+                          ? "#22c55e"
+                          : "#ef4444"
+                      }
+                    />
 
-            <ReferenceArea
-              y1={0}
-              y2={30}
-              fill="green"
-              fillOpacity={0.08}
-            />
+                  )
+                )
+              }
 
-            <Line
-              type="monotone"
-              dataKey="rsi"
-              stroke="#38bdf8"
-              strokeWidth={3}
-              dot={false}
-            />
+            </Bar>
 
-          </LineChart>
+          </BarChart>
 
         </ResponsiveContainer>
 
@@ -179,4 +184,4 @@ const RSIChart = ({
 
 };
 
-export default RSIChart;
+export default VolumeChart;
