@@ -4,6 +4,8 @@ import MainLayout from "../layouts/MainLayout";
 
 import useDashboardData from "../hooks/useDashboardData";
 
+import useLivePrice from "../hooks/useLivePrice";
+
 import AnalysisTimer from "../components/AnalysisTimer";
 
 import AIOverviewCard from "../components/ai/AIOverviewCard";
@@ -28,12 +30,12 @@ const AIAnalytics = () => {
 
     botState,
 
-    livePrice,
-
+    
     chartData
+    
+} = useDashboardData();
 
-  } = useDashboardData();
-
+const livePrice = useLivePrice()
   if (loading)
   {
     return (
@@ -56,6 +58,8 @@ const AIAnalytics = () => {
 
   const liveFormattedPrice =
     Number(livePrice || 0).toFixed(2);
+
+    console.log(aiData);
 
   return (
 
@@ -167,7 +171,7 @@ const AIAnalytics = () => {
               </h2>
 
             </div>
-
+            
             {/* ANALYSIS TIMER */}
 
             <AnalysisTimer
@@ -298,38 +302,11 @@ const AIAnalytics = () => {
 
         </h2>
 
-        <div className="
-          grid
-          grid-cols-1
-          lg:grid-cols-3
-          gap-6
-        ">
-
-          <AITradeLevel
-            title="Recommended Entry"
-            value={
-              aiData?.recommendedEntry
-            }
-            type="entry"
-          />
-
-          <AITradeLevel
-            title="Stop Loss"
-            value={
-              aiData?.recommendedStopLoss
-            }
-            type="stoploss"
-          />
-
-          <AITradeLevel
-            title="Take Profit"
-            value={
-              aiData?.recommendedTakeProfit
-            }
-            type="takeprofit"
-          />
-
-        </div>
+              <AITradeLevel
+                  recommendedEntry={aiData?.recommendedEntry}
+                  recommendedStopLoss={aiData?.recommendedStopLoss}
+                  recommendedTakeProfit={aiData?.recommendedTakeProfit}
+              />
 
       </motion.div>
 

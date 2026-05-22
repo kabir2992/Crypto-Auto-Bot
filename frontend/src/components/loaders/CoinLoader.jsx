@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function CoinLoader({ message = "STABILIZING BLOCKCHAIN SYNCHRONIZATION..." }) {
+export default function CoinLoader({ message = "GETTING YOUR DATA , HOLD ON..." }) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950 text-slate-200 backdrop-blur-md">
       <div className="relative flex items-center justify-center w-32 h-32 mb-6">

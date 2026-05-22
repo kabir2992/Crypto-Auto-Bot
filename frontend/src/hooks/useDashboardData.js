@@ -26,7 +26,7 @@ const useDashboardData = () => {
     useState(null);
 
   const fetchDashboardData =
-    async ( showLoader = false ) => {
+    async ( showLoader = true ) => {
 
       try {
 
@@ -38,14 +38,17 @@ const useDashboardData = () => {
         const [
           botResponse,
           tradesResponse,
-          chartResponse
+          chartResponse,
+          aiResponse
         ] = await Promise.all([
 
           API.get("/bot/status"),
 
           API.get("/trades"),
 
-          API.get("/chart")
+          API.get("/chart"),
+
+          API.get("/ai/analyze")
 
         ]);
 
@@ -66,54 +69,11 @@ const useDashboardData = () => {
 
         setChartData(chart);
 
+        setAiData( aiResponse.data?.ai || null );
+
         // =========================
         // AI ANALYSIS
         // =========================
-
-        try {
-
-          const latestCandle =
-                chart[
-                chart.length - 1
-                ];
-
-            API.post(
-                "/ai/analyze",
-                {
-                    candles: chart,
-                    latestCandle
-                }
-            )
-                .then((aiResponse) => {
-
-                    if (
-                        aiResponse.data?.success
-                    ) {
-
-                        setAiData(
-                            aiResponse.data.ai
-                        );
-
-                    }
-
-                })
-                .catch((aiError) => {
-
-                    console.log(
-                        "AI Error:",
-                        aiError
-                    );
-
-                });
-
-        }
-        catch (aiError)
-        {
-          console.log(
-            "AI Error:",
-            aiError
-          );
-        }
 
       }
       catch (err)
@@ -145,7 +105,7 @@ const useDashboardData = () => {
     const interval =
       setInterval(() => {
 
-        fetchDashboardData(true);
+        fetchDashboardData(false);
 
       }, 15000);
 

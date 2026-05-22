@@ -28,14 +28,13 @@ const MoneyManagement = () => {
 
     botState,
 
-    livePrice = useLivePrice(),
+    
+} = useDashboardData();
 
-    chartData
-
-  } = useDashboardData();
-
-  const [openModal, setOpenModal] =
+const [openModal, setOpenModal] =
     useState(false);
+    
+const livePrice = useLivePrice();
 
   if (loading)
   {

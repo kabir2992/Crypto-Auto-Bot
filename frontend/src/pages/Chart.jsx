@@ -28,11 +28,12 @@ const Chart = () => {
 
     chartData,
 
-    livePrice = useLivePrice() ,
-
+    
     botState
+    
+} = useDashboardData();
 
-  } = useDashboardData();
+const livePrice = useLivePrice();
 
   if (loading)
   {
