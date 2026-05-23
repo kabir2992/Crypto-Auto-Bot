@@ -10,7 +10,8 @@ import useTheme from "../../hooks/useTheme";
 
 const Topbar = ({
   sidebarOpen,
-  setSidebarOpen
+  setSidebarOpen,
+  setMobileSidebarOpen
 }) => {
 
   const livePrice =
@@ -51,9 +52,7 @@ const Topbar = ({
 
         <button
           onClick={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
+            setMobileSidebarOpen(true)
           }
           className="
             md:hidden
