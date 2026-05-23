@@ -1,16 +1,9 @@
-import {
-  useEffect,
-  useState
-} from "react";
-
-import {
-  useLocation
-} from "react-router-dom";
-
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Sidebar from "../components/layout/Sidebar";
 import MobileSidebar from "../components/layout/MobileSidebar";
 import Topbar from "../components/layout/Topbar";
-
+import MobileSidebar from "../components/layout/MobileSidebar";
 import CoinLoader from "../components/loaders/CoinLoader";
 
 const MainLayout = ({
