@@ -14,9 +14,25 @@ const MainLayout = ({
   // =========================
 
   const [
-    sidebarOpen,
-    setSidebarOpen
-  ] = useState(true);
+  sidebarOpen,
+  setSidebarOpen
+] = useState(() => {
+  const saved =
+    localStorage.getItem("sidebarOpen");
+
+  return saved !== null
+    ? JSON.parse(saved)
+    : true;
+});
+
+    useEffect(() => {
+
+  localStorage.setItem(
+    "sidebarOpen",
+    JSON.stringify(sidebarOpen)
+  );
+
+}, [sidebarOpen]);
 
   // =========================
   // MOBILE SIDEBAR
@@ -52,7 +68,7 @@ const MainLayout = ({
 
         setPageLoading(false);
 
-      }, 700);
+      }, 200);
 
     return () =>
       clearTimeout(timer);
