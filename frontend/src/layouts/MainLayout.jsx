@@ -20,6 +20,8 @@ const MainLayout = ({
   const saved =
     localStorage.getItem("sidebarOpen");
 
+  console.log("Side Bar Open or Not", saved);
+  
   return saved !== null
     ? JSON.parse(saved)
     : true;
