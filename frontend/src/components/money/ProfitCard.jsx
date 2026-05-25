@@ -5,14 +5,13 @@ import {
 
 const ProfitCard = ({
   totalProfit = 0,
-  totalLoss = 0
+  totalLoss = 0,
+  realTotalProfit = 0
 }) => {
 
-  const netProfit =
-    totalProfit - totalLoss;
+  const netProfit = realTotalProfit;
 
-  const positive =
-    netProfit >= 0;
+  const positive = netProfit >= 0;
 
   return (
 
@@ -82,7 +81,7 @@ const ProfitCard = ({
               }
             `}>
 
-              ${Math.abs(netProfit).toFixed(2)}
+              ${Math.abs(realTotalProfit).toFixed(2)}
 
             </h2>
 

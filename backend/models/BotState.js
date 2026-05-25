@@ -22,6 +22,11 @@ const botStateSchema = new mongoose.Schema(
             default: 0
         },
 
+        realTotalProfit: {
+            type: Number,
+            default: 0
+        },
+
         totalInvestedAmount: {
             type: Number,
             default: 0

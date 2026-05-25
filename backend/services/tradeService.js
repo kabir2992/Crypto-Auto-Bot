@@ -93,11 +93,18 @@ const executeSell = async (price) => {
   botState.availableBalance += sellAmount;
 
   // Update profit
-  botState.totalProfit += profit;
+  if (profit > 0)
+  {
+    botState.totalProfit += profit;
+  }
 
-  if (profit < 0) {
+  if (profit < 0) 
+  {
     botState.totalLoss = (botState.totalLoss || 0) + Math.abs(profit);
   }
+
+  // The Real Profit after subtracting Total Loss
+  botState.realTotalProfit = botState.totalProfit - botState.totalLoss;
 
   // Update remaining holdings
   botState.solHolding -= quantity;

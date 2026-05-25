@@ -30,6 +30,7 @@ const MoneyManagement = () => {
   const averageBuyPrice     = botState?.averageBuyPrice     || 0;
   const totalInvestedAmount = botState?.totalInvestedAmount || 0;
   const totalProfit         = botState?.totalProfit         || 0;
+  const realTotalProfit     = botState?.realTotalProfit     || 0;
   const totalLoss           = botState?.totalLoss           || 0;
   const currentHoldingValue = solHolding * livePrice;
   const totalPortfolioValue = availableBalance + currentHoldingValue;
@@ -154,6 +155,7 @@ const MoneyManagement = () => {
           totalPortfolioValue={totalPortfolioValue}
         />
         <ProfitCard
+          realTotalProfit={realTotalProfit}
           totalProfit={totalProfit}
           totalLoss={totalLoss}
           totalInvestedAmount={totalInvestedAmount}
