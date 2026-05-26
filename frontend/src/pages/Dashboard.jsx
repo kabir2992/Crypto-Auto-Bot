@@ -20,6 +20,8 @@ import StatCard from "../components/StatCard";
 
 import TradeTable from "../components/TradeTable";
 
+import SellGuardNotice from "../components/trades/SellGuardNotice";
+
 import BotStatus from "../components/BotStatus";
 
 import AnalysisTimer from "../components/AnalysisTimer";
@@ -599,6 +601,11 @@ const Dashboard = () => {
           delay: 0.2
         }}
       >
+
+        <SellGuardNotice
+          botState={botState}
+          livePrice={livePrice}
+        />
 
         <TradeTable
           trades={tradeList}

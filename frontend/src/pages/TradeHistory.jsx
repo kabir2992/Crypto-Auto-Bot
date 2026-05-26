@@ -16,6 +16,8 @@ import TradeFilter from "../components/trades/TradeFilters";
 
 import TradeTable from "../components/trades/TradeTable";
 
+import SellGuardNotice from "../components/trades/SellGuardNotice";
+
 const StatCard = ({ label, value, colorClass, borderClass, bgClass }) => (
   <div className={`rounded-3xl border ${borderClass} ${bgClass} backdrop-blur-xl p-6 shadow-2xl`}>
     <p className="text-slate-400 text-sm uppercase tracking-widest mb-3">{label}</p>
@@ -179,6 +181,12 @@ const TradeHistory = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
+
+        <SellGuardNotice
+          botState={botState}
+          livePrice={livePrice}
+        />
+
         <TradeTable trades={filteredTrades} />
       </motion.div>
 

@@ -17,6 +17,11 @@ const botStateSchema = new mongoose.Schema(
             default: 0
         },
 
+        lastBuyPrice: {
+            type: Number,
+            default: 0
+        },
+
         totalProfit: {
             type: Number,
             default: 0
@@ -77,6 +82,11 @@ const botStateSchema = new mongoose.Schema(
         balanceWarning: {
             type: Boolean,
             default: false
+        },
+
+        minimumSellPrice: {
+            type: Number,
+            default: 0
         },
     },
     {

@@ -28,13 +28,20 @@ const executeBuy = async (price) => {
     // Calculate SOL quantity
     const quantity = investmentAmount / price;
 
+    const previousHolding = botState.solHolding;
+    const previousInvestedAmount = previousHolding * botState.averageBuyPrice;
+    const newInvestedAmount = previousInvestedAmount + investmentAmount;
+    const newHolding = previousHolding + quantity;
+
     // Update balances
     botState.availableBalance -= investmentAmount;
-    botState.solHolding += quantity;
+    botState.solHolding = newHolding;
     botState.totalInvestedAmount = (botState.totalInvestedAmount || 0) + investmentAmount;
 
-    // Update average buy price
-    botState.averageBuyPrice = price;
+    // Update average buy price and latest entry price
+    botState.averageBuyPrice = newInvestedAmount / newHolding;
+    botState.lastBuyPrice = price;
+    botState.minimumSellPrice = botState.averageBuyPrice + 1;
 
     // Updates the Highest Price till it's Analysis
     botState.highestPrice = price;
@@ -112,12 +119,15 @@ const executeSell = async (price) => {
   if (botState.solHolding <= 0) {
     botState.solHolding = 0;
     botState.averageBuyPrice = 0;
+    botState.lastBuyPrice = 0;
+    botState.minimumSellPrice = 0;
     botState.highestPrice = 0;
     botState.trailingStopPrice = 0;
   }
   else {
     botState.highestPrice = price;
     botState.trailingStopPrice = price - (price * 0.05);
+    botState.minimumSellPrice = botState.averageBuyPrice + 1;
   }
 
   botState.botMode = "SELLING";

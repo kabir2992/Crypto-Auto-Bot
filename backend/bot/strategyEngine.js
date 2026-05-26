@@ -10,6 +10,37 @@ const getCurrentProfitPercent = ({ botState, currentPrice }) => {
   return investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount) * 100 : 0;
 };
 
+const getMinimumLongSellPrice = ({ botState }) => {
+  const referenceBuyPrice =
+    botState.minimumSellPrice ||
+    botState.lastBuyPrice ||
+    botState.averageBuyPrice ||
+    0;
+
+  if (botState.minimumSellPrice > 0) {
+    return botState.minimumSellPrice;
+  }
+
+  return referenceBuyPrice > 0 ? referenceBuyPrice + 1 : 0;
+};
+
+const canSellLongAtMinimumProfit = ({ botState, currentPrice }) => {
+  const minimumSellPrice = getMinimumLongSellPrice({ botState });
+
+  return (
+    botState.solHolding > 0 &&
+    minimumSellPrice > 0 &&
+    currentPrice >= minimumSellPrice
+  );
+};
+
+const logSellBlocked = ({ strategyName, currentPrice, botState }) => {
+  console.log(`${strategyName} SELL BLOCKED`);
+  console.log("Current Price:", currentPrice);
+  console.log("Last Buy Price:", botState.lastBuyPrice || botState.averageBuyPrice);
+  console.log("Minimum Long Sell Price:", getMinimumLongSellPrice({ botState }));
+};
+
 const hasMACDSignal = ({ latestMACD, latestSignal }) => {
   return (
     latestMACD !== null &&
@@ -109,7 +140,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     HOLD: holdScore
   });
 
-  if ( buyScore >= 5 || botState.solHolding === 0 )
+  if ( buyScore >= 5 && botState.solHolding === 0 )
   {
     console.log( "BUY SIGNAL DETECTED" );
     botState.currentStrategy = "Mean Reversion Buy";
@@ -120,7 +151,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     });
   }
 
-  if ( sellScore === 5 && botState.solHolding > 0 )
+  if ( sellScore === 5 && canSellLongAtMinimumProfit({ botState, currentPrice }) )
   {
     console.log( "TAKE PROFIT SELL" );
     botState.currentStrategy = "Mean Reversion Sell";
@@ -128,6 +159,14 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     return createStrategyResult({
       action: "SELL",
       voteData
+    });
+  }
+
+  if (sellScore === 5 && botState.solHolding > 0) {
+    logSellBlocked({
+      strategyName: "Mean Reversion",
+      currentPrice,
+      botState
     });
   }
 
@@ -188,6 +227,8 @@ const runMomentumStrategy = ({
       botState,
       currentPrice
     });
+
+  const canSellProfit = canSellLongAtMinimumProfit({ botState, currentPrice });
 
   console.log( "Current Profit:", currentProfit.toFixed(2) + "%" );
 
@@ -260,7 +301,7 @@ const runMomentumStrategy = ({
   }
 
   // Profit Available
-  if (currentProfit >= 1.5)
+  if (currentProfit >= 1.5 && canSellProfit)
   {
     sellScore += 2;
   }
@@ -289,7 +330,7 @@ const runMomentumStrategy = ({
   // BUY DECISION
   // ======================
 
-  if ( ( buyScore > sellScore && buyScore >= 7 ) || botState.solHolding === 0 )
+  if ( buyScore > sellScore && buyScore >= 7 || botState.solHolding === 0 )
   {
     console.log( "BUY SIGNAL DETECTED" );
 
@@ -305,7 +346,7 @@ const runMomentumStrategy = ({
   // SELL DECISION
   // ======================
 
-  if ( sellScore > buyScore && sellScore >= 5 && botState.solHolding > 0 )
+  if ( sellScore > buyScore && sellScore >= 7 && canSellProfit )
   {
     console.log( "TAKE PROFIT SELL" );
 
@@ -314,6 +355,14 @@ const runMomentumStrategy = ({
     return createStrategyResult({
       action: "SELL",
       voteData
+    });
+  }
+
+  if (sellScore > buyScore && sellScore >= 7 && botState.solHolding > 0) {
+    logSellBlocked({
+      strategyName: "Momentum",
+      currentPrice,
+      botState
     });
   }
 
@@ -418,7 +467,7 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   // DEFENSIVE BUY
   // ======================
 
-  if ( buyScore >= 4 && buyScore > sellScore || botState.solHolding === 0 )
+  if ( buyScore >= 4 && buyScore > sellScore && botState.solHolding === 0 )
   {
     console.log( "DEFENSIVE BUY DETECTED" );
     botState.currentStrategy = "Defensive Buy Exit";
@@ -515,7 +564,7 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
     HOLD: holdScore
   });
 
-  if ( buyScore >= 6 || botState.solHolding === 0 )
+  if ( buyScore >= 6 && botState.solHolding === 0 )
   {
     console.log( "GRID BUY DETECTED" );
     botState.currentStrategy = "Grid Buy";
@@ -530,13 +579,21 @@ const runGridStrategy = ({ rsi, currentPrice, supportLevel, resistanceLevel, vol
   // GRID SELL
   // ======================
 
-  if ( sellScore >= 5 && botState.solHolding > 0 )
+  if ( sellScore >= 5 && canSellLongAtMinimumProfit({ botState, currentPrice }) )
   {
     console.log( "GRID SELL DETECTED" );
     botState.currentStrategy = "Grid Sell";
     return createStrategyResult({
       action: "SELL",
       voteData
+    });
+  }
+
+  if (sellScore >= 5 && botState.solHolding > 0) {
+    logSellBlocked({
+      strategyName: "Grid",
+      currentPrice,
+      botState
     });
   }
 
@@ -577,7 +634,11 @@ const decideTrade = (data) => {
   // GLOBAL RISK EXITS
   // ======================
 
-  if (botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice) {
+  if (
+    botState.solHolding > 0 &&
+    currentPrice <= botState.trailingStopPrice &&
+    canSellLongAtMinimumProfit({ botState, currentPrice })
+  ) {
     const voteData = logDecisionVotes("Global Risk Exit", {
       BUY: 0,
       SELL: 10,
@@ -593,11 +654,19 @@ const decideTrade = (data) => {
     });
   }
 
+  if (botState.solHolding > 0 && currentPrice <= botState.trailingStopPrice) {
+    logSellBlocked({
+      strategyName: "Global Trailing Stop",
+      currentPrice,
+      botState
+    });
+  }
+
   const currentProfit = getCurrentProfitPercent({ botState, currentPrice });
 
   console.log("Current Profit:", currentProfit.toFixed(2) + "%");
 
-  if ( botState.solHolding > 0 && currentProfit >= 1.5 && ( rsi > 65 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
+  if ( botState.solHolding > 0 && currentProfit >= 1.5 && canSellLongAtMinimumProfit({ botState, currentPrice }) && ( rsi > 65 || currentPrice >= resistanceLevel || latestEMA20 < latestEMA50 ||
       (hasMACD && latestMACD < latestSignal) ) )
   {
     const voteData = logDecisionVotes("Global Profit Protection", {
