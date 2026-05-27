@@ -65,7 +65,7 @@ const TradeHistory = () => {
 
           {/* LEFT */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               Trade History
             </h1>
             <p className="mt-3 text-slate-400 text-lg max-w-3xl leading-8">

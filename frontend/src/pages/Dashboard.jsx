@@ -277,7 +277,7 @@ const Dashboard = () => {
 
             <h1 className="
               text-4xl
-              md:text-5xl
+              md:text-4xl
               font-black
               bg-gradient-to-r
               from-cyan-400

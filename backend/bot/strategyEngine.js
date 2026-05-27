@@ -140,7 +140,7 @@ const runMeanReversion = ({ rsi, currentPrice, supportLevel, resistanceLevel, vo
     HOLD: holdScore
   });
 
-  if ( buyScore >= 5 && botState.solHolding === 0 )
+  if ( buyScore >= 5 || botState.solHolding === 0 )
   {
     console.log( "BUY SIGNAL DETECTED" );
     botState.currentStrategy = "Mean Reversion Buy";
@@ -467,7 +467,7 @@ const runDefensiveStrategy = ({ rsi, momentum, latestMACD, latestSignal, current
   // DEFENSIVE BUY
   // ======================
 
-  if ( buyScore >= 4 && buyScore > sellScore && botState.solHolding === 0 )
+  if ( buyScore >= 4 && buyScore > sellScore || botState.solHolding === 0 )
   {
     console.log( "DEFENSIVE BUY DETECTED" );
     botState.currentStrategy = "Defensive Buy Exit";

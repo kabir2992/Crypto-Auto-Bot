@@ -36,7 +36,8 @@ const executeBuy = async (price) => {
     // Update balances
     botState.availableBalance -= investmentAmount;
     botState.solHolding = newHolding;
-    botState.totalInvestedAmount = (botState.totalInvestedAmount || 0) + investmentAmount;
+    botState.totalBuyAmount = (botState.totalBuyAmount || 0) + investmentAmount;
+    botState.totalInvestedAmount = (botState.totalBuyAmount || 0) + (botState.totalSellAmount || 0);
 
     // Update average buy price and latest entry price
     botState.averageBuyPrice = newInvestedAmount / newHolding;
@@ -98,6 +99,8 @@ const executeSell = async (price) => {
 
   // Update balance
   botState.availableBalance += sellAmount;
+  botState.totalSellAmount = (botState.totalSellAmount || 0) + sellAmount;
+  botState.totalInvestedAmount = (botState.totalSellAmount || 0) + (botState.totalBuyAmount || 0);
 
   // Update profit
   if (profit > 0)

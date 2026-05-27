@@ -29,14 +29,14 @@ const MoneyManagement = () => {
   const solHolding          = botState?.solHolding          || 0;
   const averageBuyPrice     = botState?.averageBuyPrice     || 0;
   const totalInvestedAmount = botState?.totalInvestedAmount || 0;
+  const totalBuyAmount      = botState?.totalBuyAmount      || 0;
+  const totalSellAmount     = botState?.totalSellAmount     || 0;
   const totalProfit         = botState?.totalProfit         || 0;
   const realTotalProfit     = botState?.realTotalProfit     || 0;
   const totalLoss           = botState?.totalLoss           || 0;
   const currentHoldingValue = solHolding * livePrice;
   const totalPortfolioValue = availableBalance + currentHoldingValue;
-  const profitPercentage    = totalInvestedAmount > 0
-    ? (totalProfit / totalInvestedAmount) * 100
-    : 0;
+  const profitPercentage    = totalInvestedAmount > 0 ? (realTotalProfit / totalInvestedAmount) * 100 : 0;
 
   // ── ADD FUNDS ─────────────────────────────────────────────────────────────
   const handleAddFunds = async (amount) => {
@@ -69,7 +69,7 @@ const MoneyManagement = () => {
         <div className="flex flex-col 2xl:flex-row 2xl:items-center 2xl:justify-between gap-6">
 
           <div>
-            <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-4xl font-black bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-500 bg-clip-text text-transparent">
               Money Management
             </h1>
             <p className="mt-3 text-slate-400 text-lg max-w-3xl leading-8">
@@ -149,10 +149,10 @@ const MoneyManagement = () => {
           warning={availableBalance < 10}
         />
         <PortfolioCard
+          totalInvested={totalInvestedAmount}
           solHolding={solHolding}
           currentHoldingValue={currentHoldingValue}
           averageBuyPrice={averageBuyPrice}
-          totalPortfolioValue={totalPortfolioValue}
         />
         <ProfitCard
           realTotalProfit={realTotalProfit}
@@ -180,10 +180,12 @@ const MoneyManagement = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {[
-            { label: "Total Invested",  value: `$${totalInvestedAmount.toFixed(2)}`, color: "text-blue-400",   border: "border-blue-500/20",   bg: "bg-blue-500/10"   },
-            { label: "Holding Value",   value: `$${currentHoldingValue.toFixed(2)}`, color: "text-purple-400", border: "border-purple-500/20", bg: "bg-purple-500/10" },
+            { label: "Total Invested (Total Buy + Total Sell)",  value: `$${totalInvestedAmount.toFixed(2)}`, color: "text-blue-400",   border: "border-blue-500/20",   bg: "bg-blue-500/10"   },
             { label: "SOL Holdings",    value: solHolding.toFixed(4),                color: "text-orange-400", border: "border-orange-500/20", bg: "bg-orange-500/10" },
             { label: "Average Buy",     value: `$${averageBuyPrice.toFixed(2)}`,     color: "text-emerald-400",border: "border-emerald-500/20",bg: "bg-emerald-500/10"},
+            { label: "Holding Value",   value: `$${currentHoldingValue.toFixed(2)}`, color: "text-purple-400", border: "border-purple-500/20", bg: "bg-purple-500/10" },
+            { label: "Total Buy",       value: `$${totalBuyAmount.toFixed(2)}`,      color: "text-cyan-400",   border: "border-cyan-500/20",   bg: "bg-cyan-500/10"   },
+            { label: "Total Sell",      value: `$${totalSellAmount.toFixed(2)}`,     color: "text-emerald-400",border: "border-emerald-500/20",bg: "bg-emerald-500/10" },
           ].map((s) => (
             <div key={s.label} className={`rounded-3xl border ${s.border} ${s.bg} p-6`}>
               <p className="text-slate-400 mb-3">{s.label}</p>

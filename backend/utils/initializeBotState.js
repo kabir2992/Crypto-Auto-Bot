@@ -8,7 +8,7 @@ const initializeBotState = async () => {
   if (!existingState) {
 
     await BotState.create({
-      availableBalance: 1000,
+      availableBalance: process.env.HOLDING_USD,
       solHolding: 0,
       averageBuyPrice: 0,
       totalProfit: 0,
