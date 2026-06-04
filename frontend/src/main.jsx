@@ -6,9 +6,7 @@ import App from "./App";
 
 import "./index.css";
 
-import {
-  ThemeProvider
-} from "./context/ThemeContext";
+import { ThemeProvider } from "./Binance/context/ThemeContext";
 
 ReactDOM.createRoot(
   document.getElementById("root")

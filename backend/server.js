@@ -1,71 +1,122 @@
-const http = require("http");
-const { Server } = require("socket.io");
-
-const startPriceSocket = require("./services/socketService");
-
-const app = require("./app");
-const connectDB = require("./config/db");
-require("./cron/tradingCron");
-const initializeBotState = require("./utils/initializeBotState");
-
 require("dotenv").config();
 
-// Test Routes
-const testRoutes = require("./routes/testRoutes");
-app.use("/api/test", testRoutes);
+const http        = require("http");
+const { Server }  = require("socket.io");
+const cookieParser = require("cookie-parser");
 
-// Bot Routes
-const botRoutes = require("./routes/botRoutes");
-app.use("/api/bot", botRoutes);
+const app        = require("./app");
+const connectDB  = require("./Binance/config/db");
 
-// Trade Routes
-const tradeRoutes = require("./routes/tradeRoutes");
+// ─── Binance ─────────────────────────────────────────────────
+const startPriceSocket  = require("./Binance/services/socketService");
+const initializeBotState = require("./Binance/utils/initializeBotState");
+require("./Binance/cron/tradingCron");
+
+// ─── MCX ─────────────────────────────────────────────────────
+const initializeMCX = require("./MCX/utils/initializerMCX");
+const { startLiveFeed }      = require("./MCX/socket/livePrice");
+const { bootstrapCandles }   = require("./MCX/utils/historicalCandleBootstrap");
+const { startTradingCron }   = require("./MCX/cron/tradingCron");
+
+// ============================================================
+// BINANCE ROUTES
+// ============================================================
+
+const testRoutes  = require("./Binance/routes/testRoutes");
+const botRoutes   = require("./Binance/routes/botRoutes");
+const tradeRoutes = require("./Binance/routes/tradeRoutes");
+const chartRoutes = require("./Binance/routes/chartRoutes");
+const upload      = require("./Binance/routes/uploadRoutes");
+const ai          = require("./Binance/routes/aiRoutes");
+
+app.use("/api/test",   testRoutes);
+app.use("/api/bot",    botRoutes);
 app.use("/api/trades", tradeRoutes);
+app.use("/api/chart",  chartRoutes);
+app.use("/api",        upload);
+app.use("/api/ai",     ai);
 
-// Chart Route
-const chartRoutes = require("./routes/chartRoutes");
-app.use("/api/chart", chartRoutes);
+// ============================================================
+// MCX ROUTES
+// ============================================================
 
-// Screen Shot Upload
-const upload = require("./routes/uploadRoutes");
-app.use("/api", upload);
+const mcxAuthRoutes    = require("./MCX/routes/authRoutes");
+const mcxBotRoutes     = require("./MCX/routes/botRoutes");
+const mcxChartRoutes   = require("./MCX/routes/chartRoutes");
+const mcxTradeRoutes   = require("./MCX/routes/tradeRoutes");
+const mcxSettingRoutes = require("./MCX/routes/userSettingRoutes");
 
-// AI Route for Analysing
-const ai = require("./routes/aiRoutes");
-app.use("/api/ai", ai);
+app.use("/api/auth",      mcxAuthRoutes);
+app.use("/api/mcxbot",    mcxBotRoutes);
+app.use("/api/mcxchart",  mcxChartRoutes);
+app.use("/api/mcxtrade",  mcxTradeRoutes);
+app.use("/api/setting",   mcxSettingRoutes);
+
+// ============================================================
+// MIDDLEWARE
+// ============================================================
+
+app.use(cookieParser());
+
+// ============================================================
+// HTTP + SOCKET SERVER
+// ============================================================
 
 const server = http.createServer(app);
 
-// Create Socket Server
 const io = new Server(server, {
-  cors: {
-    origin: "*"
-  }
+    cors: { origin: "*" }
 });
 
-// Socket Connection
-io.on("connection", (socket) => {
-
-  console.log("Client Connected");
-
-  socket.on("disconnect", () => {
-    console.log("Client Disconnected");
-  });
-
+io.on("connection", (socket) =>
+{
+    console.log("Client Connected");
+    socket.on("disconnect", () => console.log("Client Disconnected"));
 });
 
-// Start Price Socket
-startPriceSocket(io);
-
-// Make io globally available
 app.set("io", io);
 
-// Database Connection
-const PORT = process.env.PORT;
-connectDB();
+// ============================================================
+// STARTUP
+// ============================================================
 
-initializeBotState();
-// Start Server
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT;
+
+const startServer = async () =>
+{
+    // 1. Database
+    await connectDB();
+
+    // 2. Binance bot state
+    await initializeBotState();
+    await initializeMCX();
+
+    // 3. MCX — bootstrap historical candles so indicators
+    //    have data before the first cron fires
+    await bootstrapCandles();
+
+    // 4. Start HTTP server
+    server.listen(PORT, () =>
+    {
+        console.log(`\n🚀 Server running on port ${PORT}`);
+    });
+
+    // 5. Binance WebSocket price feed
+    startPriceSocket(io);
+
+    // 6. MCX AngleOne live feed
+    startLiveFeed().catch((err) =>
+    {
+        console.log("⚠️  MCX live feed error:", err.message);
+        console.log("   Bot will still run on bootstrapped candles.");
+    });
+
+    // 7. MCX trading cron (every 5 min)
+    startTradingCron();
+};
+
+startServer().catch((err) =>
+{
+    console.log("❌ Server startup error:", err.message);
+    process.exit(1);
 });

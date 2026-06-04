@@ -2,17 +2,19 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 
 import { AnimatePresence } from "framer-motion";
 
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./Binance/pages/Dashboard";
 
-import MiniDashboard from "./pages/MiniDashboard";
+import MiniDashboard from "./Binance/pages/MiniDashboard";
 
-import AIAnalytics from "./pages/AIAnalytics";
+import AIAnalytics from "./Binance/pages/AIAnalytics";
 
-import Chart from "./pages/Chart";
+import Chart from "./Binance/pages/Chart";
 
-import MoneyManagement from "./pages/MoneyManagement";
+import MoneyManagement from "./Binance/pages/MoneyManagement";
 
-import TradeHistory from "./pages/TradeHistory";
+import TradeHistory from "./Binance/pages/TradeHistory";
+
+import MCXDashboard from "./MCX/pages/Dashboard";
 
 function AnimatedRoutes() {
 
@@ -57,6 +59,11 @@ function AnimatedRoutes() {
         <Route
           path="/mini-dashboard"
           element={<MiniDashboard />}
+        />
+
+        <Route
+          path="/mcx"
+          element={<MCXDashboard />}
         />
 
         {/* FALLBACK */}

@@ -7,3 +7,4 @@ client/.env
 *.log
 .DS_Store
 config/vision-key.json
+backend/MCX
