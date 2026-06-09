@@ -7,6 +7,12 @@ const cookieParser = require("cookie-parser");
 const app        = require("./app");
 const connectDB  = require("./Binance/config/db");
 
+// ============================================================
+// MIDDLEWARE
+// ============================================================
+
+app.use(cookieParser());
+
 // ─── Binance ─────────────────────────────────────────────────
 const startPriceSocket  = require("./Binance/services/socketService");
 const initializeBotState = require("./Binance/utils/initializeBotState");
@@ -45,18 +51,14 @@ const mcxBotRoutes     = require("./MCX/routes/botRoutes");
 const mcxChartRoutes   = require("./MCX/routes/chartRoutes");
 const mcxTradeRoutes   = require("./MCX/routes/tradeRoutes");
 const mcxSettingRoutes = require("./MCX/routes/userSettingRoutes");
+const mcxMarketRoutes  = require("./MCX/routes/marketRoutes");
 
-app.use("/api/auth",      mcxAuthRoutes);
-app.use("/api/mcxbot",    mcxBotRoutes);
-app.use("/api/mcxchart",  mcxChartRoutes);
-app.use("/api/mcxtrade",  mcxTradeRoutes);
-app.use("/api/setting",   mcxSettingRoutes);
-
-// ============================================================
-// MIDDLEWARE
-// ============================================================
-
-app.use(cookieParser());
+app.use("/mcx/api/auth",      mcxAuthRoutes);
+app.use("/mcx/api/mcxbot",    mcxBotRoutes);
+app.use("/mcx/api/mcxchart",  mcxChartRoutes);
+app.use("/mcx/api/mcxtrade",  mcxTradeRoutes);
+app.use("/mcx/api/setting",   mcxSettingRoutes);
+app.use("/mcx/api/mcxmarket", mcxMarketRoutes);
 
 // ============================================================
 // HTTP + SOCKET SERVER
@@ -89,11 +91,26 @@ const startServer = async () =>
 
     // 2. Binance bot state
     await initializeBotState();
-    await initializeMCX();
+    // await initializeMCX();
 
     // 3. MCX — bootstrap historical candles so indicators
     //    have data before the first cron fires
     await bootstrapCandles();
+
+    // Preload MCX symbols at startup
+const axios = require("axios");
+try {
+    const res = await axios.get(
+        "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
+    );
+    global.mcxSymbols = res.data
+        .filter(i => i.exch_seg === "MCX" && i.instrumenttype === "FUTCOM")
+        .map(i => i.symbol);
+    console.log(`📦 Preloaded ${global.mcxSymbols.length} MCX symbols`);
+} catch (err) {
+    console.log("⚠️ Failed to preload MCX symbols:", err.message);
+    global.mcxSymbols = [];
+}
 
     // 4. Start HTTP server
     server.listen(PORT, () =>
