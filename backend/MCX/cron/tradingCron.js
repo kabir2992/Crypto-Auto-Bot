@@ -22,9 +22,6 @@ const { getTrackedSymbols, getCandleCount } = require("../marketData/candleAggre
 
 const MIN_CANDLES    = 200;
 const CRON_SCHEDULE  = "*/5 * * * *";   // every 5 minutes
-const nextAnalysis = new Date(Date.now() + 5 * 60 * 1000);
-// Use epoch ms so frontend can reliably compute countdown
-global.nextAnalysisTime = nextAnalysis.getTime();
 
 // ============================================================
 // HELPERS
@@ -159,7 +156,6 @@ const processSymbol = async (user, symbol) =>
         console.log(`Last Action   : ${botState.lastAction}`);
         console.log(`Balance       : ₹${botState.availableBalance?.toFixed(2)}`);
         console.log(`Next Analysis : ${botState.nextAnalysisTime?.toLocaleTimeString()}`);
-        console.log(`Next Analysis : ${nextAnalysis}`);
         console.log(`==========================================`);
 
         // ── 8. Run Strategy Engine ────────────────────────
@@ -254,8 +250,11 @@ const processSymbol = async (user, symbol) =>
 
 const startTradingCron = () =>
 {
+    global.nextAnalysisTime = new Date(Date.now() + 5 * 60 * 1000).getTime();
+    
     cron.schedule(CRON_SCHEDULE, async () =>
     {
+        global.nextAnalysisTime = new Date(Date.now() + 5 * 60 * 1000).getTime();
         const now = new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" });
 
         console.log("\n================================");
