@@ -19,6 +19,7 @@ export function useBotState(enabled = true) {
         const data = res.data;
 
         console.log("BotState API Response nextAnalysisTime:", data?.nextAnalysisTime, "raw:", data);
+         console.log("useBotState poll response:", data.success, "states:", data.states?.length, "nextAnalysisTime:", data.nextAnalysisTime);
 
         if (data.success && data.states) {
           setBotStates(data.states);
