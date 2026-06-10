@@ -53,6 +53,12 @@ const MobileSidebar = ({
       name: "Mini Dashboard",
       path: "/mini-dashboard",
       icon: MonitorSmartphone
+    },
+
+    {
+      name: "MCX Trading",
+      path: "/mcx",
+      icon: LayoutDashboard
     }
 
   ];
