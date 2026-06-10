@@ -95,11 +95,11 @@ function MCXApp() {
 }, [user]);
 
   const { prices, flashColors } = useLivePrice(!!user);
-  const { botStates, getBotState, nextAnalysisTime } = useBotState(!user);
+  const { botStates, getBotState, nextAnalysisTime } = useBotState(!!user);
   const [botState, setBotState] = useState(null);
   useEffect(() => {
       setBotState(getBotState(selSymbol));
-  }, [selSymbol, botState]);
+  }, [selSymbol, botStates]);
 
   const handleLogin = (u) => {
     setUser(u);
@@ -139,6 +139,11 @@ function MCXApp() {
     if (isMobile) setMobileOpen(false);
   };
 
+  console.log("selSymbol:", selSymbol);
+console.log("botStates:", botStates);
+console.log("botState:", botState);
+console.log("nextAnalysisTime:", nextAnalysisTime);
+
   const renderPage = () => {
     switch (page) {
       case "dashboard": return (
@@ -146,7 +151,7 @@ function MCXApp() {
           symbol={selSymbol}
           prices={prices}
           flashColors={flashColors}
-          botStates={botStates}
+          botState={botState}
           nextAnalysisTime={nextAnalysisTime}
         />
       );
