@@ -188,7 +188,7 @@ function LivePricesTable({ prices, flashColors, priceHistory }) {
 }
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
-export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
+export default function Dashboard({ symbol, botState, nextAnalysisTime }) {
   const { prices, flashColors } = useLivePrice(true);
   const [priceHistory, setPriceHistory] = useState({});
 
@@ -216,7 +216,7 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
     "ANALYZING":     "var(--accent)",
     "WAITING":       "var(--text-muted)",
   };
-  const modeColor = modeColors[botStates?.botMode] || "var(--text-muted)";
+  const modeColor = modeColors[botState?.botMode] || "var(--text-muted)";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -243,12 +243,12 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
             border: `1px solid ${modeColor}30`,
             marginBottom: 8,
           }}>
-            {botStates?.botMode || "—"}
+            {botState?.botMode || "—"}
           </div>
           <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
             Market:{" "}
             <span style={{ color: "var(--gold)", fontWeight: 600 }}>
-              {botStates?.marketType || "—"}
+              {botState?.marketType || "—"}
             </span>
           </div>
         </StatCard>
@@ -259,12 +259,12 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
             fontSize: 15, fontWeight: 700,
             color: "var(--text)", lineHeight: 1.5, marginBottom: 8,
           }}>
-            {botStates?.currentStrategy || "Observing Market"}
+            {botState?.currentStrategy || "Observing Market"}
           </div>
           <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
             Last Action:{" "}
             <span style={{ color: "var(--accent)", fontWeight: 600 }}>
-              {botStates?.lastAction || "—"}
+              {botState?.lastAction || "—"}
             </span>
           </div>
         </StatCard>
@@ -276,7 +276,7 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
             fontSize: 20, fontWeight: 700, color: "var(--gold)",
             marginBottom: 10,
           }}>
-            {formatRupee(botStates?.availableBalance)}
+            {formatRupee(botState?.availableBalance)}
           </div>
           <div style={{ display: "flex", gap: 18 }}>
             <div>
@@ -284,7 +284,7 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
                 textTransform: "uppercase", letterSpacing: "0.08em" }}>Profit</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--green)",
                 fontFamily: "'JetBrains Mono',monospace" }}>
-                {formatRupee(botStates?.totalProfit)}
+                {formatRupee(botState?.totalProfit)}
               </div>
             </div>
             <div>
@@ -292,7 +292,7 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
                 textTransform: "uppercase", letterSpacing: "0.08em" }}>Loss</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--red)",
                 fontFamily: "'JetBrains Mono',monospace" }}>
-                {formatRupee(botStates?.totalLoss)}
+                {formatRupee(botState?.totalLoss)}
               </div>
             </div>
             <div>
@@ -300,10 +300,10 @@ export default function Dashboard({ symbol, botStates, nextAnalysisTime }) {
                 textTransform: "uppercase", letterSpacing: "0.08em" }}>Net</div>
               <div style={{
                 fontSize: 13, fontWeight: 700,
-                color: getPnLColor(botStates?.realTotalProfit),
+                color: getPnLColor(botState?.realTotalProfit),
                 fontFamily: "'JetBrains Mono',monospace",
               }}>
-                {formatRupee(botStates?.realTotalProfit)}
+                {formatRupee(botState?.realTotalProfit)}
               </div>
             </div>
           </div>
